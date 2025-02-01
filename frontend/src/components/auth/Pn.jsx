@@ -6,6 +6,7 @@ import axios from "axios";
 
 const PhoneNumberPage = () => {
   const [phonenumber, setphonenumber] = useState("");
+  const [isload, setisload] = useState(false);  
   const navigate = useNavigate();
 
   // Handle mobile number input change
@@ -17,6 +18,7 @@ const PhoneNumberPage = () => {
 
   // Handle "Get OTP" button click
   const handleGetOtp = async () => {
+    setisload(true);
     console.log(phonenumber.length);
     if (phonenumber.length !== 10) {
       toast.error("Please enter a valid 10-digit mobile number.");
@@ -30,7 +32,9 @@ const PhoneNumberPage = () => {
     setphonenumber(s);
     try {
       const response = await axios.post(
-        `${import.meta.env.VITE_REACT_BACKEND_URL}/api/haxplore/user/sendingOTP`,
+        `${
+          import.meta.env.VITE_REACT_BACKEND_URL
+        }/api/haxplore/user/sendingOTP`,
         {
           phonenumber: s,
         }
@@ -42,9 +46,11 @@ const PhoneNumberPage = () => {
       if (response.data.status == 200) {
         navigate("/OTPverification");
       } else {
+        setisload(false);
         toast.error("Failed to send OTP. Please try again.");
       }
     } catch (error) {
+      setisload(false);
       console.error("Error sending OTP:", error);
       toast.error(`Something went wrong! ${error.response.data.message}`);
     }
@@ -71,10 +77,26 @@ const PhoneNumberPage = () => {
         <button
           type="submit"
           onClick={handleGetOtp}
-          className="w-full mt-6 bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition duration-300"
+          className="w-full mt-6 bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600 transition duration-300 cursor-pointer"
         >
           Get OTP
         </button>
+        {isload ? (
+          <>
+            {" "}
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <div class="w-10 h-10 border-4 border-t-blue-500 border-gray-300 rounded-full animate-spin"></div>
+            </div>
+          </>
+        ) : (
+          <></>
+        )}
       </div>
       <ToastContainer />
     </div>

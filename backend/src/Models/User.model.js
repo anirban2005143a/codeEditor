@@ -23,24 +23,10 @@ const UserSchema = new mongoose.Schema(
       required: [true, "Password is required"],
       unique: true,
     },
-    documents: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Document",
-      },
-    ],
-    sentRequests: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Request",
-      },
-    ],
-    receivedRequests: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Request",
-      },
-    ],
+    isverified: {
+      type: Boolean,
+      default: false,
+    },
   },
   {
     timestamps: true,
