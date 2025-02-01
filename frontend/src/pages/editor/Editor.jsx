@@ -30,8 +30,10 @@ const CodeEditor = () => {
   const [code, setCode] = useState("// Start coding...");
   const [language, setLanguage] = useState("javascript");
   const [theme, setTheme] = useState("vs-dark");
-  const [addedLinks, setAddedLinks] = useState({}); // New state to store added links in a separate object
-  const [selectedLink, setSelectedLink] = useState(null); // Store the selected link as an object
+  const [socket, setSocket] = useState(null);
+  const [data, setData] = useState({});
+  const [addedLinks, setAddedLinks] = useState({});
+  const [selectedLink, setSelectedLink] = useState(null);
   const [newlyAddedLink, setnewlyAddedLink] = useState(null);
   const [isNavOpen, setIsNavOpen] = useState(true);
 
@@ -43,12 +45,14 @@ const CodeEditor = () => {
   };
   useEffect(() => {
     const socket = io(`${import.meta.env.VITE_REACT_BACKEND_URL}`);
+    setSocket(socket);
     console.log(socket);
-    socket.on("message", (data) => {
-      console.log("Received message:", data);
-    });
-    socket.emit("message", "Hello from client!");
-    console.log("chut")
+    const joinRoom = () => {
+      if (socket && data.roomName) {
+        socket.emit("joinRoom", data.roomName);
+      }
+    };
+    joinRoom();
     return () => {
       socket.disconnect();
       console.log("Socket disconnected");

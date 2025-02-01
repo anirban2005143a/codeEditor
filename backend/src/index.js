@@ -21,18 +21,15 @@ const io = new Server(server, {
 });
 
 io.on("connection", (socket) => {
-  console.log("New client connected");
-  console.log("socket ko call lagayi gayi hai bhai");
+  // console.log("New client connected");
+  socket.on("joinRoom", ( roomName ) => {
+    console.log(roomName);
+    socket.join(roomName);
+    console.log(`A user joined room: ${roomName}`);
+    socket.emit("message", `Welcome to the room!${roomName}`);
+  });
   socket.on("disconnect", () => {
     console.log("Client disconnected");
-  });
-  socket.on("joinroom", (room) => {
-    socket.join(room);
-    console.log(`A user joined room: ${room}`);
-  });
-  socket.emit("message", "Hello from server!");
-  socket.on("message", (p) => {
-    console.log(p);
   });
 });
 
