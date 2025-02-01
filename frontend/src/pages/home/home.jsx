@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 gsap.registerPlugin(ScrollTrigger);
@@ -7,13 +7,30 @@ import LandingPage from './landingPage'
 import Navbar from '../../components/navbar/navbar'
 import Features from './features'
 import MousePointer from '../../components/mousePointer/mousePointer'
+import RoomNoModal from '../../components/roomNoModal/roomNoModal';
 
 const Home = () => {
 
-    
+    const [isModal, setisModal] = useState(false)
 
+    useEffect(() => {
+      if(isModal){
+        // const btn = document.querySelector("#RoomNoModalBtn")
+        // console.log(btn)
+        // btn.click()
+      }
+    }, [isModal])
+
+    window.addEventListener("mouseup" , ()=>{
+        const a = window.getSelection().toString();
+        console.log(a)
+    })
+    
     return (
         <div id='home' className=' relative overflow-x-hidden'>
+            {/* navbar  */}
+            <Navbar setisModal={setisModal} />
+
 
             {/* mousepointer  */}
             <MousePointer />
@@ -47,6 +64,9 @@ const Home = () => {
             {/* <Navbar /> */}
             <LandingPage />
 
+            {/* modal  */}
+             <RoomNoModal />
+            
             <Features />
         </div>
     )
