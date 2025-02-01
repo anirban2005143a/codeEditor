@@ -7,27 +7,27 @@ import otpgenerator from "otp-generator";
 const RegisterUser = async (req, res) => {
   try {
     const { username, email, password } = req.body;
-    console.log(username, email, password);
+    // console.log(username, email, password);
 
     const user = await UserModel.findOne({
       $or: [{ email }, { username }],
     });
-    console.log("user");
+    // console.log("user");
 
     if (user) {
       return res.status(404).json({ message: "User exists already, do login" });
     }
-    console.log("user check");
+    // console.log("user check");
 
     const hashpassword = await bcrypt.hash(password, 10);
-    console.log("hashpassword");
+    // console.log("hashpassword");
 
     const newuser = await UserModel.create({
       username,
       email,
       password: hashpassword,
     });
-    console.log("newuser");
+    // console.log("newuser");
 
     const createduser = await UserModel.findById(newuser._id);
     if (!createduser) {
@@ -36,8 +36,8 @@ const RegisterUser = async (req, res) => {
         .json({ message: "Server issue while creating user" });
     }
 
-    console.log(createduser);
-    console.log("now from here");
+    // console.log(createduser);
+    // console.log("now from here");
 
     return res.status(201).json({
       message: "User created successfully",
@@ -64,13 +64,13 @@ const LoginUser = async (req, res) => {
     }
 
     const ispasscorrect = await bcrypt.compare(password, user.password);
-    console.log(ispasscorrect);
+    // console.log(ispasscorrect);
 
     if (!ispasscorrect) {
       return res.status(401).json({ message: "Wrong password" }); // 🔹 401 for incorrect credentials
     }
 
-    console.log(process.env.Authentication_for_jsonwebtoken);
+    // console.log(process.env.Authentication_for_jsonwebtoken);
 
     const jsonewbestoken = jwt.sign(
       { email: user.email, _id: user.id },
@@ -179,7 +179,7 @@ const checkingotp =async (req, res) => {
       ans: "true",
     });
   } catch (error) {
-    console.error("Error in checking OTP:", error);
+    // console.error("Error in checking OTP:", error);
     return res.status(400).json({
       message: `Having error in checking the OTP: ${error.message}`,
       ans: "false",

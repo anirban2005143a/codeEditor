@@ -11,7 +11,7 @@ import {
   authsignupmw,
 } from "../Middleware/checking_parameters.js";
 import { authtoken } from "../Middleware/Auth.js";
-console.log("aaya hu routes ");
+// console.log("aaya hu routes ");
 const userrouter = Router();
 userrouter.route("/Register").post(authsignupmw, RegisterUser);
 userrouter.route("/login").post(authloginmw, LoginUser);
