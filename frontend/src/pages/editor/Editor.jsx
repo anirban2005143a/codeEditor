@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import MonacoEditor from "@monaco-editor/react";
-
+import "./Editor.css";
 // Auto complete for languages
 import registerCppCompletions from "../../languages/cpp/cpp";
 import registerPythonCompletions from "../../languages/python/python";
@@ -36,6 +36,9 @@ const CodeEditor = () => {
   const [selectedLink, setSelectedLink] = useState(null);
   const [newlyAddedLink, setnewlyAddedLink] = useState(null);
   const [isNavOpen, setIsNavOpen] = useState(true);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [messages, setMessages] = useState([]);
+  const [chatMessage, setChatMessage] = useState("");
 
   const mainRef = useRef(null);
 
@@ -44,20 +47,23 @@ const CodeEditor = () => {
     // socket.emit("codeUpdate", value); // Emit updated code to other users
   };
   useEffect(() => {
-    const socket = io(`${import.meta.env.VITE_REACT_BACKEND_URL}`);
-    setSocket(socket);
-    console.log(socket);
+    const s = io(`${import.meta.env.VITE_REACT_BACKEND_URL}`);
+    setSocket(s);
+
     const joinRoom = () => {
-      if (socket && data.roomName) {
-        socket.emit("joinRoom", data.roomName);
+      if (s && data.roomName) {
+        s.emit("joinRoom", data.roomName);
       }
     };
     joinRoom();
     return () => {
-      socket.disconnect();
-      console.log("Socket disconnected");
+      if (s) {
+        s.disconnect();
+        console.log("Socket disconnected");
+      }
     };
-  }, []);
+  }, [data.roomName]);
+
   const changeLanguage = (monaco) => {
     if (language === "cpp") {
       registerCppCompletions(monaco);
@@ -225,7 +231,37 @@ const CodeEditor = () => {
   useEffect(() => {
     addDefaultFileOnSelectLanguage(language);
   }, []);
+  const sendMessage = (e) => {
+    e.preventDefault();
+    const newMessage = { user: "You", text: chatMessage };
+    let userName = localStorage.getItem("username");
+    socket.emit("sending-message", { chatMessage, userName }, (response) => {
+      console.log(userName);
+      console.log("Message sent: " + chatMessage);
+      console.log("Server response: " + response);
+    });
 
+    setMessages((prevMessages) => [...prevMessages, newMessage]);
+    setChatMessage("");
+  };
+
+  useEffect(() => {
+    if (socket) {
+      socket.on("new-message-to-all", (message) => {
+        console.log("Broadcast message received:", message);
+        setMessages((prevMessages) => [
+          ...prevMessages,
+          { user: message.userName, text: message.chatMessage },
+        ]);
+      });
+
+      return () => {
+        if (socket) {
+          socket.off("new-message-to-all"); 
+        }
+      };
+    }
+  }, [socket]); 
   console.log(addedLinks);
   // console.log(selectedLink)
   // console.log(language)
@@ -284,7 +320,51 @@ const CodeEditor = () => {
             <option value="shell">Shell</option>
           </select>
         </div>
-
+        <div className="live-chat-container">
+          <div
+            className={`chat-toggle ${isChatOpen ? "open" : "close"}`}
+            onClick={() => setIsChatOpen(!isChatOpen)}
+          >
+            💬
+          </div>
+          {isChatOpen && (
+            <div className="chat-box">
+              <div className="chat-header">
+                <span className="font-bold text-2xl text-black">Live Chat</span>
+                <button
+                  className="bg-black rounded p-2 cursor-pointer"
+                  onClick={() => setIsChatOpen(false)}
+                >
+                  ❌
+                </button>
+              </div>
+              <div className="chat-body">
+                {messages.map((msg, index) => (
+                  <div
+                    key={index}
+                    className="chat-message"
+                    style={{
+                      backgroundColor:
+                        msg.user == "You" ? "#DCF8C6" : "#EDEDED",
+                    }}
+                  >
+                    <strong>{msg.user}:</strong> {msg.text}
+                  </div>
+                ))}
+              </div>
+              <form className="chat-input" onSubmit={sendMessage}>
+                <input
+                  type="text"
+                  value={chatMessage}
+                  onChange={(e) => setChatMessage(e.target.value)}
+                  placeholder="Type a message..."
+                  required
+                />
+                <button type="submit">Send</button>
+              </form>
+            </div>
+          )}
+        </div>
         {/* Select themes */}
         <div className="theme w-36 ">
           <select

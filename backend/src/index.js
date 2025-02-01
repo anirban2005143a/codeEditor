@@ -22,7 +22,7 @@ const io = new Server(server, {
 
 io.on("connection", (socket) => {
   // console.log("New client connected");
-  socket.on("joinRoom", ( roomName ) => {
+  socket.on("joinRoom", (roomName) => {
     console.log(roomName);
     socket.join(roomName);
     console.log(`A user joined room: ${roomName}`);
@@ -30,6 +30,15 @@ io.on("connection", (socket) => {
   });
   socket.on("disconnect", () => {
     console.log("Client disconnected");
+  });
+  socket.on("sending-message", (message, callback) => {
+    console.log("triggerereeee")
+    console.log("Received message from client:", message.chatMessage);
+    console.log("name of  client:", message.userName);
+    socket.broadcast.emit("new-message-to-all", message);
+    if (callback) { 
+      callback("Message received successfully");
+    }
   });
 });
 
