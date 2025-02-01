@@ -53,7 +53,7 @@ const RegisterUser = async (req, res) => {
 
 const LoginUser = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password  } = req.body;
 
     const user = await UserModel.findOne({ email });
 
@@ -77,7 +77,6 @@ const LoginUser = async (req, res) => {
       process.env.Authentication_for_jsonwebtoken,
       { expiresIn: "24h" }
     );
-
     return res.status(200).json({
       message: "User logged in successfully",
       success: true,
@@ -144,7 +143,7 @@ const generateandsetOTP = async (req, res) => {
 
 const checkingotp =async (req, res) => {
   try {
-    const { phonenumber, otp} = req.body;
+    const { phonenumber, otp ,id} = req.body;
 
     if (!otp) {
       return res.status(400).json({
@@ -166,7 +165,15 @@ const checkingotp =async (req, res) => {
         ans: "false",
       });
     }
-
+    const user = await UserModel.findById(id);
+    if (!user) {
+      return res.status(404).json({
+        message: "User not found.",
+        ans: "false",
+      });
+    }
+    user.isverified = true;
+    await user.save();
     res.status(200).json({
       message: "User verified successfully.",
       ans: "true",

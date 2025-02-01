@@ -36,9 +36,11 @@ const OTPPage = () => {
     }
     console.log(phonenumber);
     try {
+      let id = localStorage.getItem("itemhai");
       const response = await axios.post(
         `${import.meta.env.VITE_REACT_BACKEND_URL}/api/haxplore/user/checkingOTP`,
         {
+          id,
           phonenumber,
           otp: enteredOtp,
         }

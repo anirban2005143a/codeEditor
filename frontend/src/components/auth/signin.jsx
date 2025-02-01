@@ -23,18 +23,23 @@ function SignInPage() {
         }
       );
       console.log(response);
-      console.log(response.data.user._id)
+      console.log(response.data.user._id);
       localStorage.setItem("itemhai", response.data.user._id);
       localStorage.setItem("token", response.data.jwttoken);
       localStorage.setItem("username", response.data.user.username);
       localStorage.setItem("email", response.data.user.email);
       toast.success(response.data.message);
-      navigate("/mobilenumberverication");
+      console.log(response.data.user.isverified);
+      if (response.data.user.isverified) {
+        navigate("/editor");
+      } else {
+        navigate("/mobilenumberverication");
+      }
     } catch (error) {
       console.log(error);
       if (error?.response?.data?.error) {
         toast.error(error.response.data.error);
-      }else{
+      } else {
         toast.error(error.response.data.message);
       }
       setIsload(false);
@@ -105,7 +110,7 @@ function SignInPage() {
                 placeholder="Enter your password"
               />
             </div>
-            
+
             <button
               type="submit"
               className="w-full px-4 py-2 text-white bg-blue-600 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"

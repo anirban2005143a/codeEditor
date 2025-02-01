@@ -1,22 +1,26 @@
-import { useState } from 'react'
-import { createBrowserRouter , RouterProvider } from 'react-router-dom'
-import CodeEditor from './pages/editor/Editor'
-import Home from './pages/home/home'
-import PhoneNumberPage from './components/auth/Pn'
-import OTPPage from './components/auth/Otp'
-import SignUpPage from './components/auth/signup'
-import SignInPage from './components/auth/signin'
+import { useState } from "react";
+import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import CodeEditor from "./pages/editor/Editor";
+import Home from "./pages/home/home";
+import PhoneNumberPage from "./components/auth/Pn";
+import OTPPage from "./components/auth/Otp";
+import SignUpPage from "./components/auth/signup";
+import SignInPage from "./components/auth/signin";
+import Privateroutes from "./components/auth/Privateroute.jsx";
 
 function App() {
-
   const router = createBrowserRouter([
     {
-      path : "/",
-      element : <Home/>
+      path: "/",
+      element: <Home />,
     },
     {
-      path : "/editor",
-      element : <CodeEditor/>
+      path: "/editor",
+      element: (
+        <Privateroutes>
+          <CodeEditor />
+        </Privateroutes>
+      ),
     },
     {
       path: "/Signin",
@@ -32,15 +36,15 @@ function App() {
     },
     {
       path: "/mobilenumberverication",
-      element: <PhoneNumberPage/>,
-    }
-  ])
+      element: <PhoneNumberPage />,
+    },
+  ]);
 
   return (
     <>
-       <RouterProvider router={router}/>
+      <RouterProvider router={router} />
     </>
-  )
+  );
 }
 
-export default App
+export default App;
