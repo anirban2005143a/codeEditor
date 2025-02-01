@@ -99,19 +99,16 @@ const socketHandel = (io) => {
 
     // Cursor movements
     socket.on("cursorMove", ({ roomID, cursor }) => {
-        try {
-          if (rooms[roomID]) {
-            // Update the cursor position for the user
-            rooms[roomID].cursors[socket.id] = cursor;
-  console.log(rooms[roomID])
-            // Broadcast the updated cursor position to all users in the room (except the sender)
-            socket.to(roomID).emit("cursorMove", { id: socket.id, cursor });
-          }
-        } catch (error) {
-          socket.emit("errorMessage", { message: error.message, error: 1 });
+      try {
+        if (rooms[roomID]) {
+          rooms[roomID].cursors[socket.id] = cursor;
+          console.log(`Cursor updated for ${socket.id}:`, cursor); // Debug log
+          socket.to(roomID).emit("cursorMove", { id: socket.id, cursor });
         }
-      });
-  
+      } catch (error) {
+        socket.emit("errorMessage", { message: error.message, error: 1 });
+      }
+    });
 
     // User disconnects
     socket.on("disconnect", () => {

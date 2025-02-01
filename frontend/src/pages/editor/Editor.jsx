@@ -22,7 +22,6 @@ import registerDartCompletions from "../../languages/dart/dart";
 import registerHaskellCompletions from "../../languages/haskell/haskell";
 import registerYamlCompletions from "../../languages/yaml/yaml";
 import handelEditorThemes from "../../themes/theme";
-import executeCode from "./execute";
 import NavigationPanel from "./NavigationPanel";
 
 import { io } from "socket.io-client";
@@ -37,16 +36,16 @@ const CodeEditor = () => {
   const [newlyAddedLink, setnewlyAddedLink] = useState(null);
   const [isNavOpen, setIsNavOpen] = useState(true);
   const [alertMessage, setalertMessage] = useState("");
-
-  const mainRef = useRef(null);
-  const editorRef = useRef(null);
   const [code, setCode] = useState("// Start coding...");
   const [roomID, setroomID] = useState(123);
   const [socket, setSocket] = useState(socketIoServer);
   const [cursors, setCursors] = useState({});
-  const [tooltip, setTooltip] = useState({ visible: false, content: "", top: 0, left: 0 });
-  const decorationsRef = useRef([]); 
 
+  const mainRef = useRef(null);
+  const editorRef = useRef(null);
+  const monacoRef = useRef(null);
+  const decorationsRef = useRef([]);
+  // Keep track of cursor colors for each user
 
   useEffect(() => {
 
@@ -81,6 +80,7 @@ const CodeEditor = () => {
 
       socket.on("cursorMove", ({ id, cursor }) => {
         setCursors((prev) => ({ ...prev, [id]: cursor }));
+        updateCursorDecorations();
       });
 
       socket.on("removeCursor", (id) => {
@@ -89,6 +89,7 @@ const CodeEditor = () => {
           delete updated[id];
           return updated;
         });
+        updateCursorDecorations();
       });
 
       return () => {
@@ -99,6 +100,7 @@ const CodeEditor = () => {
       };
     }
   }, [socket, roomID]);
+
 
   const handleCodeChange = (value) => {
     setCode(value); // Update the local code state
@@ -163,44 +165,7 @@ const CodeEditor = () => {
     setIsNavOpen(!isNavOpen);
   };
 
-  // const handleEditorDidMount = (editor, monaco) => {
-  //   handelEditorThemes(monaco);
-  //   changeLanguage(monaco);
-  //   registerCustomSyntax(monaco);
-  // };
-
-   // Handle editor mount
-   const handleEditorDidMount = (editor, monaco) => {
-    editorRef.current = editor;
-    handelEditorThemes(monaco);
-    changeLanguage(monaco);
-    registerCustomSyntax(monaco);
-
-    // Listen for cursor movements
-    editor.onDidChangeCursorPosition(() => handleCursorChange(editor));
-
-    // Listen for mouse move events to handle hover
-    editor.onMouseMove((e) => {
-      const { target } = e;
-      if (target.type === 7) { // Monaco's cursor decoration type
-        const cursorId = target.id; // Use the cursor ID as the decoration ID
-        const cursor = cursors[cursorId];
-        if (cursor) {
-          const { top, left } = getCursorPosition(editor, cursor);
-          handleCursorHover([cursorId], top, left);
-        }
-      } else {
-        handleCursorLeave();
-      }
-    });
-  };
-
-
-  const execute = () => {
-    const input = document.querySelector("textarea#inputArea").value;
-    executeCode(code, input, language);
-  };
-
+  //add a default file on select a language
   const addDefaultFileOnSelectLanguage = (languageParams) => {
     const getExtensionFromLanguage = (lang) => {
       switch (lang) {
@@ -272,58 +237,56 @@ const CodeEditor = () => {
     }
   };
 
-  // Handle cursor movements
-  const handleCursorChange = (editor) => {
-    const position = editor.getPosition();
+  // cursors 
+  const handleCursorChange = () => {
+    if (!editorRef.current) return;
+
+    const position = editorRef.current.getPosition();
+    console.log("Cursor moved:", position); // Debug log
+
     if (position) {
-      socket.emit("cursorMove", { roomID, cursor: position }); // Emit updated cursor position to other users
+      socket.emit("cursorMove", { roomID, cursor: position });
     }
   };
+  const updateCursorDecorations = () => {
+    if (!editorRef.current || !monacoRef.current) return;
 
-  // Handle cursor hover
-  // const handleCursorHover = (ids, top, left) => {
-  //   setTooltip({
-  //     visible: true,
-  //     content: ids.join(", "), // Show all socket IDs in the tooltip
-  //     top: top - 20, // Position the tooltip above the cursor
-  //     left: left,
-  //   });
-  // };
+    const monaco = monacoRef.current;
+    const editor = editorRef.current;
 
-  // // Handle cursor leave
-  // const handleCursorLeave = () => {
-  //   setTooltip({ visible: false, content: "", top: 0, left: 0 });
-  // };
+    let decorations = Object.entries(cursors).map(([id, cursor]) => ({
+      range: new monaco.Range(cursor.lineNumber, cursor.column, cursor.lineNumber, cursor.column + 1),
+      options: {
+        className: "remote-cursor",
+        isWholeLine: false,
+        glyphMarginClassName: "remote-cursor",
+        isWholeLine: false,
+        afterContentClassName: "cursor-label",
+        overviewRuler: {
+          color: "red",
+          position: monaco.editor.OverviewRulerLane.Right
+        }
+      }
+    }));
 
-  // Handle cursor hover
-  const handleCursorHover = (ids, top, left) => {
-    setTooltip({
-      visible: true,
-      content: ids.join(", "), // Show all socket IDs in the tooltip
-      top: top - 20, // Position the tooltip above the cursor
-      left: left,
+    decorationsRef.current = editor.deltaDecorations(decorationsRef.current, decorations);
+  };
+
+
+  //handel mount function 
+  const handleEditorDidMount = (editor, monaco) => {
+    editorRef.current = editor;
+    monacoRef.current = monaco;
+
+    // Initialize language and theme handlers
+    handelEditorThemes(monaco);
+    changeLanguage(monaco);
+    registerCustomSyntax(monaco);
+
+    editor.onDidChangeCursorPosition(() => {
+      handleCursorChange();
+      updateCursorDecorations();
     });
-  };
-
-  // Handle cursor leave
-  const handleCursorLeave = () => {
-    setTooltip({ visible: false, content: "", top: 0, left: 0 });
-  };
-
-  // Function to calculate cursor position
-  // const getCursorPosition = (editor, pos) => {
-  //   if (!editor || !pos) return { top: 0, left: 0 };
-  //   const top = editor.getTopForLineNumber(pos.lineNumber);
-  //   const left = editor.getOffsetForColumn(pos.lineNumber, pos.column);
-  //   return { top, left };
-  // };
-
-   // Function to calculate cursor position
-   const getCursorPosition = (editor, pos) => {
-    if (!editor || !pos) return { top: 0, left: 0 };
-    const top = editor.getTopForLineNumber(pos.lineNumber);
-    const left = editor.getOffsetForColumn(pos.lineNumber, pos.column);
-    return { top, left };
   };
 
 
@@ -360,24 +323,6 @@ const CodeEditor = () => {
     }
   }, [alertMessage]);
 
-  // Update cursor decorations when cursors change
-  useEffect(() => {
-    if (editorRef.current) {
-      const editor = editorRef.current;
-      const newDecorations = Object.entries(cursors).map(([id, pos]) => ({
-        range: new monaco.Range(pos.lineNumber, pos.column, pos.lineNumber, pos.column),
-        options: {
-          className: "cursor-decoration", // CSS class for the cursor
-          stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
-          hoverMessage: { value: `User: ${id}` }, // Tooltip message
-        },
-        id: id, // Use socket ID as the decoration ID
-      }));
-
-      // Remove old decorations and add new ones
-      decorationsRef.current = editor.deltaDecorations(decorationsRef.current, newDecorations);
-    }
-  }, [cursors]);
 
   return (
     <div
@@ -485,11 +430,7 @@ const CodeEditor = () => {
                 theme={theme}
                 value={code}
                 onChange={handleCodeChange}
-                onMount={(editor) => {
-                  editorRef.current = editor;
-                  editor.onDidChangeCursorPosition(() => handleCursorChange(editor));
-                  handleEditorDidMount(editor, monaco);
-                }}
+                onMount={handleEditorDidMount}
                 options={{
                   readOnly: selectedLink ? false : true,
                   automaticLayout: true,
@@ -509,53 +450,6 @@ const CodeEditor = () => {
                   showFoldingControls: "always",
                 }}
               />
-             {/* Render cursor indicators */}
-             {Object.entries(cursors).map(([id, pos]) => {
-                if (!pos || !editorRef.current) return null;
-
-                // Calculate the exact position of the cursor
-                const { top, left } = getCursorPosition(editorRef.current, pos);
-
-                return (
-                  <div
-                    key={id}
-                    style={{
-                      position: "absolute",
-                      top: `${top}px`,
-                      left: `${left}px`,
-                      width: "20px",
-                      height: "18px",
-                      backgroundColor: "red",
-                      pointerEvents: "none",
-                      zIndex:100
-                    }}
-                    onMouseEnter={() =>{
-                      console.log("dseybgf")
-                      handleCursorHover([id], top, left)}}
-                    onMouseLeave={handleCursorLeave}
-                  />
-                );
-              })}
-
-             {/* Tooltip */}
-             {tooltip.visible && (
-                <div
-                  style={{
-                    position: "absolute",
-                    top: `${tooltip.top}px`,
-                    left: `${tooltip.left}px`,
-                    backgroundColor: "rgba(0, 0, 0, 0.8)",
-                    color: "white",
-                    padding: "4px 8px",
-                    borderRadius: "4px",
-                    fontSize: "12px",
-                    whiteSpace: "nowrap",
-                    zIndex: 1000, // Ensure the tooltip is above other elements
-                  }}
-                >
-                  {tooltip.content}
-                </div>
-              )}
             </div>
           </div>
         </div>
@@ -585,12 +479,9 @@ const CodeEditor = () => {
               Execute
             </button>
             <div className="flex ps-0 space-x-1 rtl:space-x-reverse sm:ps-2">
-              <button
-                type="button"
-                className="inline-flex justify-center items-center p-2 text-gray-500 rounded-sm cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600"
-              >
+              <label htmlFor="textFileInput" className=" cursor-pointer">
                 <svg
-                  className="w-4 h-4"
+                  className="w-8 h-8"
                   aria-hidden="true"
                   xmlns="http://www.w3.org/2000/svg"
                   fill="none"
@@ -603,8 +494,14 @@ const CodeEditor = () => {
                     d="M1 6v8a5 5 0 1 0 10 0V4.5a3.5 3.5 0 1 0-7 0V13a2 2 0 0 0 4 0V6"
                   />
                 </svg>
-                <span className="sr-only">Attach file</span>
-              </button>
+              </label>
+              <input
+                id="textFileInput"
+                type="file"
+                accept=".txt"
+                className=" hidden justify-center items-center p-2 text-gray-500 rounded-sm cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600"
+              />
+
             </div>
           </div>
         </div>

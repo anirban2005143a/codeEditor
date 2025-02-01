@@ -11,3 +11,21 @@
   background-clip: text;
   color: transparent;
 }
+
+.remote-cursor {
+  position: absolute;
+  width: 2px;
+  height: 1em;
+  background-color: red; /* Customize cursor color */
+  z-index: 10;
+}
+
+.cursor-label::after {
+  content: "👤 User";
+  color: white;
+  background: red;
+  font-size: 12px;
+  padding: 2px 5px;
+  border-radius: 3px;
+  margin-left: 5px;
+}
