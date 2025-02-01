@@ -11,16 +11,6 @@ import RoomNoModal from '../../components/roomNoModal/roomNoModal';
 
 const Home = () => {
 
-    const [isModal, setisModal] = useState(false)
-
-    useEffect(() => {
-      if(isModal){
-        // const btn = document.querySelector("#RoomNoModalBtn")
-        // console.log(btn)
-        // btn.click()
-      }
-    }, [isModal])
-
     window.addEventListener("mouseup" , ()=>{
         const a = window.getSelection().toString();
         console.log(a)
@@ -29,8 +19,7 @@ const Home = () => {
     return (
         <div id='home' className=' relative overflow-x-hidden'>
             {/* navbar  */}
-            <Navbar setisModal={setisModal} />
-
+            <Navbar />
 
             {/* mousepointer  */}
             <MousePointer />
@@ -63,9 +52,6 @@ const Home = () => {
 
             {/* <Navbar /> */}
             <LandingPage />
-
-            {/* modal  */}
-             <RoomNoModal />
             
             <Features />
         </div>

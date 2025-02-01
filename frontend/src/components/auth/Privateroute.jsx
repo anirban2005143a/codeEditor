@@ -18,7 +18,7 @@ const Privateroutes = ({ children }) => {
           Authorization,
         }
       );
-      console.log(response);
+      // console.log(response);
       if (response.data.success) {
         setIsverified(true);
         toast.success("Token verified! Welcome to your private area.");
@@ -27,7 +27,7 @@ const Privateroutes = ({ children }) => {
         toast.error("Unauthorized access. Please log in.");
       }
     } catch (error) {
-      console.error("Token verification failed:", error);
+      // console.error("Token verification failed:", error);
       setIsverified(false);
       toast.error("Session timeout , Token has been expired,Login again");
     } finally {
@@ -54,7 +54,7 @@ const Privateroutes = ({ children }) => {
           alignItems: "center",
         }}
       >
-        <div class="w-10 h-10 border-4 border-t-blue-500 border-gray-300 rounded-full animate-spin"></div>
+        <div className="w-10 h-10 border-4 border-t-blue-500 border-gray-300 rounded-full animate-spin"></div>
       </div>
     );
   }
