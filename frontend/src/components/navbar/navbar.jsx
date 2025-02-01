@@ -1,13 +1,17 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+
+
 const Navbar = (props) => {
+
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [roomId, setroomId] = useState("");
   const [inroomId, setinroomId] = useState("");
   const [check, setCheck] = useState("");
   const navigate = useNavigate();
+
   const getRoomId = () => {
     const chars = "abcdefghijklmnopqrstuvwxyz0123456789";
     const getRandomChar = () => chars[Math.floor(Math.random() * chars.length)];
@@ -21,6 +25,7 @@ const Navbar = (props) => {
     console.log("Room ID:");
     navigate(`/editor?${roomId}`);
   };
+
   const handleCollaborateClick = () => {
     setIsModalOpen(true);
   };
@@ -43,9 +48,80 @@ const Navbar = (props) => {
     console.log("Enter Room clicked");
   };
 
+  useEffect(() => {
+    isModalOpen ? document.body.style.overflow = "hidden" : document.body.style.overflow = "auto"
+  }, [isModalOpen])
+
+
   return (
     <>
-      <nav className="fixed top-0 left-0 w-full z-50 border-gray-200 ">
+      <nav id="navbar" className="fixed top-0 left-0 w-full z-50 border-gray-200 ">
+
+        <div id="default-modal" tabindex="-1" aria-hidden="true" className="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-[calc(100%-1rem)] max-h-full">
+          <div className="relative p-4 w-full max-w-2xl max-h-full">
+            <div className="relative bg-white rounded-lg shadow-sm dark:bg-gray-700">
+              <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600 border-gray-200">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                  Terms of Service
+                </h3>
+                <button type="button" className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="default-modal">
+                  <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6" />
+                  </svg>
+                  <span className="sr-only">Close modal</span>
+                </button>
+              </div>
+              <div className="p-4 md:p-5 space-y-4">
+                <div className="text-center">
+                  {check === "create" ? (
+                    <>
+                      <div className="text-white font-bold text-2xl mb-4">
+                        Room ID: {roomId}
+                      </div>
+                      <div className="flex justify-center items-center gap-12 h-full mt-4 cursor-pointer">
+                        <div className="bg-gradient-to-b from-gray-800/40 to-transparent p-[4px] rounded-[16px]">
+                          <button
+                            onClick={handling}
+                            className="cursor-pointer group p-[4px] rounded-[12px] bg-gradient-to-b from-gray-700 to-gray-600 shadow-[0_2px_4px_rgba(0,0,0,0.7)] hover:shadow-[0_4px_8px_rgba(0,0,0,0.6)] active:shadow-[0_0px_1px_rgba(0,0,0,0.8)] active:scale-[0.995] transition-all duration-200"
+                          >
+                            <div className="bg-gradient-to-b from-gray-600 to-gray-700 rounded-[8px] px-6 py-4">
+                              <div className="flex gap-2 items-center">
+                                <span className="font-semibold text-2xl text-white">
+                                  Create Room with this ID
+                                </span>
+                              </div>
+                            </div>
+                          </button>
+                        </div>
+                      </div>
+                    </>
+                  ) : check === "enter" ? (
+                    <div className="flex flex-col items-center gap-4">
+                      <input
+                        type="text"
+                        value={inroomId}
+                        onChange={(e) => setinroomId(e.target.value)}
+                        className="p-3 rounded-lg w-64 text-center text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Enter Room ID"
+                      />
+                      <button
+                        onClick={() => console.log("Entering room:", inroomId)}
+                        className="bg-gradient-to-r from-green-500 to-green-600 text-white py-2 px-6 rounded-lg hover:from-green-600 hover:to-green-700 font-bold shadow-lg hover:shadow-xl transition-all duration-300"
+                      >
+                        Join Room
+                      </button>
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+              <div className="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
+                <button onClick={handleCreateRoom} data-modal-hide="default-modal" type="button" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Enter Room</button>
+                <button onClick={handleEnterRoom} data-modal-hide="default-modal" type="button" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:outline-none focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800">Join Room</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
           <a className="flex items-center space-x-3 rtl:space-x-reverse">
             <img
@@ -177,9 +253,9 @@ const Navbar = (props) => {
                 </a>
               </li>
               <li>
-                <a className="block py-2 px-3 text-gray-900 rounded-sm hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700 cursor-pointer">
+                <Link to="/editor" className="block py-2 px-3 text-gray-900 rounded-sm hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700 cursor-pointer">
                   Editor
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -188,9 +264,11 @@ const Navbar = (props) => {
 
       {/* Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center backdrop-blur-2xl bg-opacity-2 z-50">
-          <div className="bg-[#4b5563] p-8 rounded-lg shadow-2xl h-[500px] w-[600px] transform transition-all duration-300 ease-in-out hover:scale-105">
+        <div className="fixed inset-0 flex items-center justify-center backdrop-blur-[5px] bg-[#2020236b] z-50">
+          <div className="bg-[#4b5563] p-8 rounded-lg shadow-2xl md:w-[600px] w-[97%] transform transition-all duration-300 ease-in-out hover:scale-100">
             <div className="flex justify-end">
+
+
               <button
                 onClick={handleCloseModal}
                 className="h-10 w-10 cursor-pointer text-white text-center rounded-full hover:bg-gray-700 transition-colors duration-200"
@@ -212,17 +290,15 @@ const Navbar = (props) => {
             </div>
 
             <div className="flex justify-center gap-12 mt-5 mb-8">
-              <button
+              <button type="button"
                 onClick={handleCreateRoom}
-                className="bg-gradient-to-r from-blue-500 to-blue-600 cursor-pointer text-white py-4 px-9 rounded-lg hover:from-blue-600 hover:to-blue-700 font-bold shadow-lg hover:shadow-xl transition-all duration-300"
-              >
-                Create a Room
+                className="text-white cursor-pointer bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
+                Generate a Room Id
               </button>
-              <button
+              <button type="button"
                 onClick={handleEnterRoom}
-                className="bg-gradient-to-r from-green-500 to-green-600 cursor-pointer text-white py-4 px-9 rounded-lg hover:from-green-600 hover:to-green-700 font-bold shadow-lg hover:shadow-xl transition-all duration-300"
-              >
-                Enter a Room
+                className="text-white cursor-pointer bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
+                Enter a Room Id
               </button>
             </div>
 
@@ -233,37 +309,37 @@ const Navbar = (props) => {
                     Room ID: {roomId}
                   </div>
                   <div className="flex justify-center items-center gap-12 h-full mt-4 cursor-pointer">
-                    <div className="bg-gradient-to-b from-gray-800/40 to-transparent p-[4px] rounded-[16px]">
+                    <div className=" p-[4px] rounded-[16px]">
                       <button
                         onClick={handling}
-                        className="cursor-pointer group p-[4px] rounded-[12px] bg-gradient-to-b from-gray-700 to-gray-600 shadow-[0_2px_4px_rgba(0,0,0,0.7)] hover:shadow-[0_4px_8px_rgba(0,0,0,0.6)] active:shadow-[0_0px_1px_rgba(0,0,0,0.8)] active:scale-[0.995] transition-all duration-200"
-                      >
-                        <div className="bg-gradient-to-b from-gray-600 to-gray-700 rounded-[8px] px-6 py-4">
-                          <div className="flex gap-2 items-center">
-                            <span className="font-semibold text-2xl text-white">
-                              Create Room with this ID
-                            </span>
-                          </div>
-                        </div>
+                        type="button"
+                        className="text-white cursor-pointer bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700">
+                        Enter the Room
                       </button>
                     </div>
                   </div>
                 </>
               ) : check === "enter" ? (
                 <div className="flex flex-col items-center gap-4">
-                  <input
-                    type="text"
-                    value={inroomId}
-                    onChange={(e) => setinroomId(e.target.value)}
-                    className="p-3 rounded-lg w-64 text-center text-black focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Enter Room ID"
-                  />
-                  <button
-                    onClick={() => console.log("Entering room:", inroomId)}
-                    className="bg-gradient-to-r from-green-500 to-green-600 text-white py-2 px-6 rounded-lg hover:from-green-600 hover:to-green-700 font-bold shadow-lg hover:shadow-xl transition-all duration-300"
-                  >
-                    Join Room
-                  </button>
+
+
+                  <form
+                    onSubmit={() => console.log("Entering room:", inroomId)}
+                    className="flex flex-col justify-center items-center max-w-sm mx-auto">
+                    <label for="simple-search" className="sr-only">Search</label>
+                    <div className="relative w-full">
+                      <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
+                        <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 20">
+                          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5v10M3 5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm0 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm12 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm0 0V6a3 3 0 0 0-3-3H9m1.5-2-2 2 2 2" />
+                        </svg>
+                      </div>
+                      <input type="text" id="simple-search" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search branch name..." required />
+                    </div>
+                    <button type="submit"
+                      className=" m-3 cursor-pointer text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700">
+                      Join Room
+                    </button>
+                  </form>
                 </div>
               ) : null}
             </div>
@@ -271,6 +347,7 @@ const Navbar = (props) => {
           <ToastContainer />
         </div>
       )}
+
     </>
   );
 };

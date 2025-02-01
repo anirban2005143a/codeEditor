@@ -5,7 +5,7 @@ import { app } from "./app.js";
 import dotenv from "dotenv";
 import { createServer } from "http";
 import { Server } from "socket.io";
-
+import socketHandel from "./sockethandel.js";
 dotenv.config();
 
 console.log(`I am getting in the answer of ${process.env.PORT}`);
@@ -20,27 +20,7 @@ const io = new Server(server, {
   },
 });
 
-io.on("connection", (socket) => {
-  // console.log("New client connected");
-  socket.on("joinRoom", (roomName) => {
-    console.log(roomName);
-    socket.join(roomName);
-    console.log(`A user joined room: ${roomName}`);
-    socket.emit("message", `Welcome to the room!${roomName}`);
-  });
-  socket.on("disconnect", () => {
-    console.log("Client disconnected");
-  });
-  socket.on("sending-message", (message, callback) => {
-    console.log("triggerereeee")
-    console.log("Received message from client:", message.chatMessage);
-    console.log("name of  client:", message.userName);
-    socket.broadcast.emit("new-message-to-all", message);
-    if (callback) { 
-      callback("Message received successfully");
-    }
-  });
-});
+socketHandel(io)
 
 app.use(cors());
 

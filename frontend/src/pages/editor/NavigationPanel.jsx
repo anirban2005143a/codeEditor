@@ -225,7 +225,7 @@ const NavigationPanel = (props) => {
             +
           </button>
         </div>
-        <ul className="mt-4 space-y-2">
+        <ul className="mt-4 space-y-2 h-full overflow-y-auto">
           {links.map((link, index) => (
             <li
               key={index}

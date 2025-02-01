@@ -25,6 +25,7 @@ import handelEditorThemes from "../../themes/theme";
 import NavigationPanel from "./NavigationPanel";
 
 import { io } from "socket.io-client";
+import Navbar from "../../components/navbar/navbar";
 
 const socketIoServer = io(`${import.meta.env.VITE_REACT_BACKEND_URL}`);
 
@@ -37,7 +38,7 @@ const CodeEditor = () => {
   const [isNavOpen, setIsNavOpen] = useState(true);
   const [alertMessage, setalertMessage] = useState("");
   const [code, setCode] = useState("// Start coding...");
-  const [roomID, setroomID] = useState(123);
+  const [roomID, setroomID] = useState(window.location.href.split("?")[1]);
   const [socket, setSocket] = useState(socketIoServer);
   const [cursors, setCursors] = useState({});
 
@@ -327,13 +328,18 @@ const CodeEditor = () => {
   return (
     <div
       id="editor"
-      className="md:p-4 p-2 "
-      style={{
-        backgroundImage: "linear-gradient(135deg, #fdfcfb 0%, #e2d1c3 100%)",
-      }}
+      className="md:p-4 p-2 bg-black"
+      // style={{
+      //   backgroundImage: "linear-gradient(135deg, #fdfcfb 0%, #e2d1c3 100%)",
+      // }}
     >
+      {/* toasify for notification alert  */}
       <ToastContainer />
-      <h2 className="text-xl font-semibold py-4">AI-Assisted Code Editor</h2>
+
+      {/* navbar  */}
+      <Navbar/>
+
+      <h2 className=" font-semibold p-4 mt-[80px] text-white text-2xl">AI-Assisted Code Editor</h2>
 
       <div className="controlers flex gap-2 w-full justify-start px-2 py-4 items-center">
         <button
@@ -407,7 +413,7 @@ const CodeEditor = () => {
         </div>
       </div>
 
-      <div className="flex h-[90vh] my-2">
+      <div className="flex h-[70vh] my-2">
         <NavigationPanel
           selectedLink={selectedLink}
           setSelectedLink={setSelectedLink}
@@ -419,7 +425,7 @@ const CodeEditor = () => {
         />
         <div
           ref={mainRef}
-          className="h-full bg-green-200 transition-all duration-150"
+          className="h-full transition-all duration-150"
           style={{ width: isNavOpen ? "80%" : "100%" }}
         >
           <div className="h-full">
@@ -512,6 +518,7 @@ const CodeEditor = () => {
         id="output"
         className=" min-h-32 bg-slate-200 p-4 md:m-2 m-1 mt-0 rounded-lg border-[1px] border-gray-700"
       ></div>
+
     </div>
   );
 };
