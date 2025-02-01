@@ -11,17 +11,36 @@ dotenv.config();
 console.log(`I am getting in the answer of ${process.env.PORT}`);
 
 const server = createServer(app);
-import socketHandel from "./sockethandel.js";
 
 const io = new Server(server, {
   cors: {
     origin: "*",
     methods: ["GET", "POST"],
+    creadentials: true,
   },
 });
 
-//socket handel function
-socketHandel(io)
+io.on("connection", (socket) => {
+  // console.log("New client connected");
+  socket.on("joinRoom", (roomName) => {
+    console.log(roomName);
+    socket.join(roomName);
+    console.log(`A user joined room: ${roomName}`);
+    socket.emit("message", `Welcome to the room!${roomName}`);
+  });
+  socket.on("disconnect", () => {
+    console.log("Client disconnected");
+  });
+  socket.on("sending-message", (message, callback) => {
+    console.log("triggerereeee")
+    console.log("Received message from client:", message.chatMessage);
+    console.log("name of  client:", message.userName);
+    socket.broadcast.emit("new-message-to-all", message);
+    if (callback) { 
+      callback("Message received successfully");
+    }
+  });
+});
 
 app.use(cors());
 
@@ -34,5 +53,5 @@ connectDB()
     });
   })
   .catch((err) => {
-    console.error(`MongoDB connection error: ${err.message}`);
+    console.error(`MongoDB connection error: ${err}`);
   });
