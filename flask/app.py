@@ -30,7 +30,7 @@ def generate_code():
     if not data or 'code_prompt' not in data:
         return jsonify({"error": "Invalid JSON data. 'code_prompt' is required."}), 400
 
-    code_prompt = "Generate the next lines of the code without comments, language:py: " + data['code_prompt']
+    code_prompt = "you are excelent in coding . Your task is to send code based on given code and prompt and send the code making important portion bold or highlighted . Don't send any other any comments except the correct code ." + data['code_prompt']
 
     # Start the timer to measure response time
     st = time.time()
@@ -60,7 +60,7 @@ def error_detect():
     if not data or 'code_prompt' not in data:
         return jsonify({"error": "Invalid JSON data. 'code_prompt' is required."}), 400
 
-    code_prompt = "you are excelent in coding . Your task is to Find the error in the provided code and send the correct code making edited portion bold or highlighted . Don't send any other any comments except the correct code ." + data['code_prompt']
+    code_prompt = "you are excelent in coding . Your task is to Find the error in the provided code respective and send the correct code making edited portion bold or highlighted based on the given language . the language will be provided . Don't send any other any comments except the correct code ." + data['code_prompt']
 
     # Start the timer to measure response time
     st = time.time()

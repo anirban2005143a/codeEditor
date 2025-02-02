@@ -215,23 +215,23 @@ const NavigationPanel = (props) => {
   return (
     <div
       ref={navRef}
-      className="h-full bg-blue-200 transition-all duration-150"
+      className="h-full bg-slate-600 transition-all duration-150"
       style={{ width: props.isNavOpen ? "20%" : "0%" }}
     >
-      <div className="p-4 transition-all duration-50" style={{ opacity: props.isNavOpen ? "1" : "0" }}>
+      <div className="p-4 transition-all duration-50 overflow-y-auto h-full" style={{ opacity: props.isNavOpen ? "1" : "0" }}>
         <div className="flex justify-between items-center">
-          <h2 className="text-xl font-bold">File System</h2>
-          <button onClick={handleAddLinkClick} className="px-2 py-1.5 bg-blue-500 text-white rounded hover:bg-blue-600">
+          <h2 className="text-xl font-bold text-white">File System</h2>
+          <button onClick={handleAddLinkClick} className="px-2 py-1.5 bg-slate-800 text-white rounded hover:bg-slate-900 cursor-pointer">
             +
           </button>
         </div>
-        <ul className="mt-4 space-y-2 h-full overflow-y-auto">
+        <ul className="my-4 space-y-2 h-full text-white">
           {links.map((link, index) => (
             <li
               key={index}
               onContextMenu={(e) => handleRightClick(e, index)}
               onClick={() => handleLinkClick(link)}
-              className={`cursor-pointer ${props.selectedLink?.name === link ? 'bg-blue-400' : 'hover:bg-blue-300'}`}
+              className={` cursor-pointer ${props.selectedLink?.name === link ? 'bg-slate-800' : 'hover:bg-slate-700'}`}
             >
               <a href="#" className="block p-2 rounded">
                 {getFileIcon(link)}
@@ -252,7 +252,7 @@ const NavigationPanel = (props) => {
                     handleInputKeyPress(newLink)
                   }
                 }}
-                className="w-full p-2 rounded border border-blue-300"
+                className=" mb-3 w-full text-white bg-slate-800 p-2 rounded border border-blue-300"
                 placeholder="Type link name and press Enter"
               />
             </li>

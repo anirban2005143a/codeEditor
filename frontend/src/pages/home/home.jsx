@@ -17,7 +17,7 @@ const Home = () => {
     })
     
     return (
-        <div id='home' className=' relative overflow-x-hidden'>
+        <div id='home' className=' bg-black relative overflow-x-hidden'>
             {/* navbar  */}
             <Navbar />
 

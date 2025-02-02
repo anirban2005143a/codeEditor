@@ -54,7 +54,7 @@ const ErrorSuggestion = (props) => {
                 headers: {
                     "Content-Type": "application/json", // Set content type to JSON
                 },
-                body: JSON.stringify({ code_prompt: Code }), // JSON payload
+                body: JSON.stringify({ code_prompt: `my code is ${Code} and the language is ${props.language}` }), // JSON payload
             });
 
             if (!response.ok) {
@@ -165,7 +165,7 @@ const ErrorSuggestion = (props) => {
                 </div >
 
                 {/* output from ai  */}
-                {output && output === "" && <div className="p-2 text-white rounded-2xl border-2 border-slate-700 mx-2">
+                {output && output !== "" && <div className="p-2 text-white rounded-2xl border-2 border-slate-700 mx-2">
                     {output}
                 </div>}
 

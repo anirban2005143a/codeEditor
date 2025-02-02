@@ -61,7 +61,7 @@ const LandingPage = () => {
         <div id='landingPage' ref={landingRef} className=' h-screen bg-cover bg-right bg-[#000000] bg-blend-darken flex flex-col  '>
             <div className=" w-full h-[50%] z-10 relative md:px-8 px-2 brandName  font-bold  pt-[100px] flex justify-end items-center gap-[50px]">
                 <p className='text-neutral-700 md:text-[9.5rem] sm:text-7xl text-6xl code' >CODE</p>
-                <p className=' playfair-display-font md:text-7xl sm:text-6xl text-4xl editor'>EDITOR</p>
+                <p className=' playfair-display-font md:text-7xl sm:text-6xl text-4xl editor'>FUSION</p>
             </div>
             <div className=" w-full h-[50%] flex flex-col items-start justify-center ">
                 <p className='md:w-[60%] sm:w-[80%] w-full z-10 relative intoduction text-white text-[1.2rem] py-4 md:px-8 px-4  font-extralight'>

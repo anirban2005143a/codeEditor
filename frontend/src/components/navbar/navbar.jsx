@@ -47,7 +47,6 @@ const Navbar = (props) => {
     isModalOpen ? document.body.style.overflow = "hidden" : document.body.style.overflow = "auto"
   }, [isModalOpen])
 
-
   return (
     <>
       <nav id="navbar" className="fixed top-0 left-0 w-full z-50 border-gray-200 ">
@@ -68,32 +67,30 @@ const Navbar = (props) => {
             id="navbar-user"
           >
             <ul className="flex flex-col font-medium p-4 md:p-0 mt-4 border border-gray-100 rounded-lg md:space-x-8 rtl:space-x-reverse md:flex-row md:mt-0 md:border-0  ">
+
               <li>
-                <a
-                  className="block py-2 px-3 text-white bg-blue-700 rounded-sm md:bg-transparent md:text-blue-700 md:p-0 md:dark:text-blue-500 cursor-pointer"
-                  aria-current="page"
-                >
+                <Link to="/" className={`block py-2 px-3 ${window.location.pathname === "/" ? " md:dark:text-blue-500 md:text-blue-700 " : " text-white "} rounded-sm hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0  md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700 cursor-pointer`}>
                   Home
-                </a>
+                </Link>
               </li>
               <li>
-                <a className="block py-2 px-3 text-gray-900 rounded-sm hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700 cursor-pointer">
+                <Link to="/about" className={`block py-2 px-3 ${window.location.pathname === "/about" ? " md:dark:text-blue-500 md:text-blue-700 " : " text-white "} rounded-sm hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0  md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700 cursor-pointer`}>
                   About
-                </a>
+                </Link>
               </li>
-              <li>
+              {window.location.pathname !== "/editor" && <li>
                 <a
-                  className="block py-2 px-3 text-gray-900 rounded-sm hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700 cursor-pointer"
                   onClick={handleCollaborateClick}
-                >
+                  className={`block py-2 px-3 ${window.location.pathname === "/collab" ? " md:dark:text-blue-500 md:text-blue-700 " : " text-white "} rounded-sm hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0  md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700 cursor-pointer`}>
                   Collaborate
                 </a>
-              </li>
+              </li>}
               <li>
-                <Link to="/editor" className="block py-2 px-3 text-gray-900 rounded-sm hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0 dark:text-white md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700 cursor-pointer">
+                <Link to="/editor" className={`block py-2 px-3 ${window.location.pathname === "/editor" ? " md:dark:text-blue-500 md:text-blue-700 " : " text-white "} rounded-sm hover:bg-gray-100 md:hover:bg-transparent md:hover:text-blue-700 md:p-0  md:dark:hover:text-blue-500 dark:hover:bg-gray-700 dark:hover:text-white md:dark:hover:bg-transparent dark:border-gray-700 cursor-pointer`}>
                   Editor
                 </Link>
               </li>
+
             </ul>
           </div>
         </div>
@@ -161,20 +158,33 @@ const Navbar = (props) => {
                 <div className="flex flex-col items-center gap-4">
 
                   <form
-                    onSubmit={() => {
-                      if (roomId.length === 9) {
+                    onSubmit={(e) => {
+                      e.preventDefault()
+                      console.log(roomId.length, roomId)
+                      if (roomId.length === 11) {
                         navigate(`/editor?${roomId}`)
+                      } else {
+                        toast.error('Enter Valid room id', {
+                          position: "top-right",
+                          autoClose: 5000,
+                          hideProgressBar: false,
+                          closeOnClick: false,
+                          pauseOnHover: true,
+                          draggable: true,
+                          progress: undefined,
+                          theme: "dark",
+                        });
                       }
                     }}
                     className="flex flex-col justify-center items-center max-w-sm mx-auto">
-                    <label for="simple-search" className="sr-only">Search</label>
+                    <label htmlFor="simple-search" className="sr-only">Search</label>
                     <div className="relative w-full">
                       <div className="absolute inset-y-0 start-0 flex items-center ps-3 pointer-events-none">
                         <svg className="w-4 h-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 18 20">
-                          <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5v10M3 5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm0 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm12 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm0 0V6a3 3 0 0 0-3-3H9m1.5-2-2 2 2 2" />
+                          <path stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5v10M3 5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm0 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm12 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm0 0V6a3 3 0 0 0-3-3H9m1.5-2-2 2 2 2" />
                         </svg>
                       </div>
-                      <input type="text" autoComplete={false} onChange={(e) => {
+                      <input type="text" autoComplete="off" onChange={(e) => {
                         setroomId(e.target.value)
                       }} id="simple-search" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search branch name..." required />
                     </div>

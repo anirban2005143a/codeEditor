@@ -347,6 +347,26 @@ const CodeEditor = () => {
     }
   };
 
+  //read txt file
+  const readTxtFile = (event) => {
+    const file = event.target.files[0]; // Get the selected file
+
+    if (file && file.type === "text/plain") { // Check if the file is a text file
+      const reader = new FileReader(); // Create a FileReader object
+
+      reader.onload = function (e) {
+        const content = e.target.result; // Get the file content
+        setinput(content)
+        console.log(content); // Output the content to the console
+      };
+
+      reader.readAsText(file); // Read the file as text
+    } else {
+      console.log("Please select a valid .txt file.");
+      setalertMessage("Please select a valid .txt file.")
+    }
+  }
+
   console.log(output)
   // useEffect 
   useEffect(() => {
@@ -548,9 +568,6 @@ const CodeEditor = () => {
     <div
       id="editor"
       className="md:p-4 p-2 bg-black"
-    // style={{
-    //   backgroundImage: "linear-gradient(135deg, #fdfcfb 0%, #e2d1c3 100%)",
-    // }}
     >
       {/* toasify for notification alert  */}
       <ToastContainer />
@@ -683,14 +700,14 @@ const CodeEditor = () => {
             <span className="playfair-display-font text-lg pe-2">AI </span>Suggetions
           </button>
 
-          {/* error detectioon  */}
+          {/* error detectioon 
           <button onClick={() => {
             const elem = document.querySelector("#ErrorSuggetion")
             gsap.to(elem, { x: 0, duration: 0.5, ease: "power2.out" });
           }}
             type="button" className=" text-md errorDetect cursor-pointer text-white bg-gradient-to-r from-red-400 via-red-500 to-red-600 hover:bg-gradient-to-br focus:ring-4 focus:outline-none focus:ring-red-300 dark:focus:ring-red-800 shadow-lg shadow-red-500/50 dark:shadow-lg dark:shadow-red-800/80 font-medium rounded-lg px-5 py-2.5 text-center me-2 mb-2">
             Error Detection
-          </button>
+          </button> */}
         </div>
 
       </div>
@@ -743,6 +760,7 @@ const CodeEditor = () => {
         </div>
       </div>
 
+      {/* input field for code  */}
       <h2 className=" px-2 font-medium ">Input</h2>
       <div id="input" className=" m-1 md:m-2 min-h-[20vh]">
         <div className="w-full mb-4 border border-gray-200 rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
@@ -792,6 +810,7 @@ const CodeEditor = () => {
               <input
                 id="textFileInput"
                 type="file"
+                onChange={readTxtFile}
                 accept=".txt"
                 className=" hidden justify-center items-center p-2 text-gray-500 rounded-sm cursor-pointer hover:text-gray-900 hover:bg-gray-100 dark:text-gray-400 dark:hover:text-white dark:hover:bg-gray-600"
               />
@@ -801,6 +820,7 @@ const CodeEditor = () => {
         </div>
       </div>
 
+      {/* output field for code  */}
       <h2 className=" px-2 font-medium ">Output</h2>
       <div className="OutputInfo flex justify-end px-4 gap-4 font-light text-sm ">
         {/* status Code  */}
@@ -815,10 +835,11 @@ const CodeEditor = () => {
         className=" min-h-32 bg-slate-500 p-4 md:m-2 m-1 mt-0 rounded-lg border-[1px] text-white border-gray-700"
       >{output.output}</div>
 
+      {/* live chat  */}
       {isCollaboration && <Livechat />}
 
-      <ErrorSuggestion code={code} />
-      <AiSupport />
+      {/* ai support panel  */}
+      <AiSupport language={language} />
 
     </div>
   );

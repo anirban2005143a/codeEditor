@@ -5,40 +5,40 @@ import { useEffect } from "react";
 import axios from "axios"
 import { ToastContainer, toast } from "react-toastify"
 
-const AiSupport = () => {
+const AiSupport = (props) => {
 
     const sidebarRef = useRef(null);
     const [sidebarWidth, setSidebarWidth] = useState(300);
     const [prompt, setprompt] = useState(null)
     const [output, setoutput] = useState(null)
     const [IsDragging, setIsDragging] = useState(false)
+    const [isLoading, setisLoading] = useState(false)
 
     // Function to close the sidebar
     const closeSidebar = () => {
-        setprompt(null)
+        setprompt("")
+        setoutput("")
+        document.querySelector("#AiSupport").querySelector("textarea").value = ""
         gsap.to(sidebarRef.current, { x: "100%", duration: 0.5, ease: "power2.out" });
     };
 
     // Handle mouse down on the resize handle
     const handleMouseDown = (e) => {
         e.preventDefault();
-        document.addEventListener("mousemove", (e) => {
-            handleMouseMove(e)
-        });
-        setIsDragging(true)
+        setIsDragging(true);
+        document.addEventListener("mousemove", handleMouseMove);
         document.addEventListener("mouseup", handleMouseUp);
     };
 
     // Handle mouse move to resize the sidebar
     const handleMouseMove = (e) => {
-        if (IsDragging) {
-            console.log("djfncufdv")
-            const newWidth = window.innerWidth - e.clientX;
-            if (newWidth >= 200 && newWidth <= 600) {
-                setSidebarWidth(newWidth);
-            }
+        console.log("dfvfbvg")
+        const newWidth = window.innerWidth - e.clientX;
+        if (newWidth >= 200 && newWidth <= 600) {
+            setSidebarWidth(newWidth);
         }
-    }
+        console.log(newWidth)
+    };
 
     // Handle mouse up to stop resizing
     const handleMouseUp = () => {
@@ -50,14 +50,16 @@ const AiSupport = () => {
     const handleGenerateCode = async () => {
         try {
             console.log(`${import.meta.env.VITE_REACT_FLASK_URL}/generate_code`)
+            setisLoading(true)
             const response = await fetch(`${import.meta.env.VITE_REACT_FLASK_URL}/generate_code`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json", // Set content type to JSON
                 },
-                body: JSON.stringify({ code_prompt: prompt }), // JSON payload
+                body: JSON.stringify({ code_prompt: `${prompt} and the language is ${props.language}` }), // JSON payload
             });
 
+            setisLoading(false)
             if (!response.ok) {
                 console.log("error")
                 // throw new Error(`HTTP error! Status: ${response.status}`);
@@ -93,6 +95,7 @@ const AiSupport = () => {
                 setoutput(str);
             }
         } catch (err) {
+            setisLoading(false)
             toast.error(err.message, {
                 position: "top-right",
                 autoClose: 5000,
@@ -124,7 +127,7 @@ const AiSupport = () => {
             id="AiSupport"
             className=" rounded-xl z-40 fixed top-[15vh] right-0 min-h-[50vh] max-h-[70vh] overflow-x-visible overflow-y-auto bg-gray-900 shadow-lg transform translate-x-full"
         >
-            <ToastContainer/>
+            <ToastContainer />
             <div className=" relative w-full h-full py-15 ">
 
                 {/* Resize handle */}
@@ -157,8 +160,9 @@ const AiSupport = () => {
                     <button onClick={() => {
                         if (prompt && prompt !== "") handleGenerateCode()
                     }}
+                        disabled={isLoading}
                         className="w-full bg-blue-500 text-white px-4 py-2 rounded cursor-pointer">
-                        Ask AI
+                        {isLoading ? "Fetching" : "Ask AI"}
                     </button>
                 </div >
 

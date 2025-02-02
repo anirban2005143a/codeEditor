@@ -8,12 +8,17 @@ import SignUpPage from "./components/auth/signup";
 import SignInPage from "./components/auth/signin";
 import Privateroutes from "./components/auth/Privateroute.jsx";
 import CreateRoom from "./components/auth/socket.jsx";
+import AboutPage from "./pages/about/about.jsx";
 
 function App() {
   const router = createBrowserRouter([
     {
       path: "/",
       element: <Home />,
+    },
+    {
+      path: "/about",
+      element: <AboutPage />,
     },
     {
       path: "/editor",

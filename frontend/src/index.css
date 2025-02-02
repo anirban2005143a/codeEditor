@@ -12,18 +12,21 @@
   color: transparent;
 }
 
-/* .remote-cursor {
-  border-left: 2px solid red;
-  width: 2px;
-  margin-left: -1px;
-} */
+::-webkit-scrollbar {
+  width: 10px; /* Width of the scrollbar */
+}
 
-.cursor-label::after {
-  content: "👤 User";
-  color: white;
-  background: red;
-  font-size: 12px;
-  padding: 2px 5px;
-  border-radius: 3px;
-  margin-left: 5px;
+::-webkit-scrollbar-track {
+  background-color: #505050; /* Color of the track */
+  border-radius: 10px; /* Border radius of the track */
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #383838; /* Color of the thumb */
+  border-radius: 10px; /* Border radius of the thumb */
+  border: 1.5px solid #505050; /* Padding around the thumb */
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: #555; /* Color of the thumb on hover */
 }
