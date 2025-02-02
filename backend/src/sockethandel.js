@@ -35,6 +35,8 @@ const socketHandel = (io) => {
       try {
         if (rooms[roomID]) {
           rooms[roomID].cursors[socket.id] = cursor;
+
+          console.log(rooms[roomID].cursors)
           console.log(`Cursor updated for ${socket.id}:`, cursor); // Debug log
           socket.to(roomID).emit("cursorMove", { id: socket.id, cursor });
         }

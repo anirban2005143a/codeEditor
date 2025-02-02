@@ -12,12 +12,11 @@
   color: transparent;
 }
 
-.remote-cursor {
-  position: absolute;
+/* .remote-cursor {
+  border-left: 2px solid red;
   width: 2px;
-  background-color: red;
-  height: 1em;
-}
+  margin-left: -1px;
+} */
 
 .cursor-label::after {
   content: "👤 User";

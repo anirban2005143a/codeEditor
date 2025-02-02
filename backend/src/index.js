@@ -21,16 +21,6 @@ const io = new Server(server, {
 });
 socketHandel(io)
 
-import * as Y from "yjs"
-import WebSocket from "ws";
-import {setupWSConnection} from "y-websocket/bin/utils"
-
-const wss = new WebSocket.Server({ server });
-
-wss.on("connection", (ws) => {
-  setupWSConnection(ws, new Map());
-});
-
 app.use(cors());
 
 app.use(express.json());

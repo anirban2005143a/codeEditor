@@ -3,8 +3,8 @@ import MonacoEditor from "@monaco-editor/react";
 import { ToastContainer, toast } from 'react-toastify';
 import * as monaco from "monaco-editor";
 import { MonacoBinding } from "real-time-monaco";
-import * as Y from "yjs";
-import { WebsocketProvider } from "y-websocket";
+// import * as Y from "yjs";
+// import { WebsocketProvider } from "y-websocket";
 // import { MonacoBinding } from "y-monaco";
 
 // Auto complete for languages
@@ -45,15 +45,12 @@ const CodeEditor = () => {
   const [code, setCode] = useState("// Start coding...");
   const [roomID, setroomID] = useState(window.location.href.split("?")[1]);
   const [socket, setSocket] = useState(socketIoServer);
-  const [cursors, setCursors] = useState({});
-
+  const [initialCursors, setinitialCursors] = useState(null)
+  const [userCursorsHoverEffect, setUserCursorsHoverEffect] = useState({}); // { userId: { decorationId, position } }
   const mainRef = useRef(null);
   const editorRef = useRef(null);
   const monacoRef = useRef(null);
-  const decorationsRef = useRef([]);
   const containerRef = useRef(null);
-  const [editor, setEditor] = useState(null);
-
 
 
   const handleCodeChange = (value) => {
@@ -191,39 +188,16 @@ const CodeEditor = () => {
     }
   };
 
-  // cursors 
+  // send current cursors 
   const handleCursorChange = () => {
     if (!editorRef.current) return;
 
     const position = editorRef.current.getPosition();
-    console.log("Cursor moved:", position); // Debug log
+    // console.log("Cursor moved:", position); // Debug log
 
     if (position) {
       socket.emit("cursorMove", { roomID, cursor: position });
     }
-  };
-  const updateCursorDecorations = () => {
-    if (!editorRef.current || !monacoRef.current) return;
-
-    const monaco = monacoRef.current;
-    const editor = editorRef.current;
-
-    let decorations = Object.entries(cursors).map(([id, cursor]) => ({
-      range: new monaco.Range(cursor.lineNumber, cursor.column, cursor.lineNumber, cursor.column + 1),
-      options: {
-        className: "remote-cursor",
-        isWholeLine: false,
-        glyphMarginClassName: "remote-cursor",
-        isWholeLine: false,
-        afterContentClassName: "cursor-label",
-        overviewRuler: {
-          color: "red",
-          position: monaco.editor.OverviewRulerLane.Right
-        }
-      }
-    }));
-
-    decorationsRef.current = editor.deltaDecorations(decorationsRef.current, decorations);
   };
 
   //handel mount function 
@@ -236,13 +210,72 @@ const CodeEditor = () => {
     changeLanguage(monaco);
     registerCustomSyntax(monaco);
 
+    //current cursor position
     editor.onDidChangeCursorPosition(() => {
       handleCursorChange();
-      updateCursorDecorations();
+    });
+
+    //undo and redo 
+    //ctlr + z
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyZ, () => {
+      editor.trigger('source', 'undo');
+    });
+    //ctlr + Y
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyY, () => {
+      editor.trigger('source', 'redo');
+    });
+    // undo button click 
+    document.querySelector("#editor #undoBtn").addEventListener("click", () => {
+      editor.trigger('source', 'undo');
+    })
+    // redo button click 
+    document.querySelector("#editor #redoBtn").addEventListener("click", () => {
+      editor.trigger('source', 'redo');
+    })
+
+    //// Register a hover provider to show user IDs on hover
+    monaco.languages.registerHoverProvider('javascript', {
+      provideHover: (model, position) => {
+        for (const userId in userCursorsHoverEffect) {
+          const cursorPosition = userCursorsHoverEffect[userId].cursor;
+          if (
+            cursorPosition.lineNumber === position.lineNumber &&
+            cursorPosition.column === position.column
+          ) {
+            return {
+              contents: [
+                { value: `**User ID:** ${userId}` }, // Display the user ID in a tooltip
+              ],
+            };
+          }
+        }
+        return null;
+      },
     });
   };
 
+  // Function to generate random colors for each user cursor
+  const getRandomColor = () => {
+    const hue = Math.floor(Math.random() * 360);
+    // Pick high saturation and brightness for contrast
+    return `hsl(${hue}, 100%, ${hue > 200 ? 40 : 60}%)`;
+  }
+  // Function to inject CSS to live cursor dynamically
+  function injectCursorStyle(userId, color) {
+    const style = document.createElement("style");
+    style.innerHTML = `
+    .cursor-${userId} {
+      background-color: ${color} !important;
+      border-left: 3px solid ${color};
+      margin-left: 0px;
+    }
+  `;
+    document.head.appendChild(style);
+  }
 
+
+
+  // useEffect 
   useEffect(() => {
     if (roomID && socket) {
       console.log(socket.id);
@@ -250,7 +283,7 @@ const CodeEditor = () => {
 
       socket.on("init", ({ code, cursors }) => {
         setCode(code);
-        setCursors(cursors);
+        setinitialCursors(cursors)
       });
 
       socket.on("userJoined", (socketJoin) => {
@@ -273,82 +306,14 @@ const CodeEditor = () => {
 
       socket.on("codeChange", (newCode) => setCode(newCode));
 
-      socket.on("cursorMove", ({ id, cursor }) => {
-        setCursors((prev) => ({ ...prev, [id]: cursor }));
-        updateCursorDecorations();
-      });
-
-      socket.on("removeCursor", (id) => {
-        setCursors((prev) => {
-          const updated = { ...prev };
-          delete updated[id];
-          return updated;
-        });
-        updateCursorDecorations();
-      });
-
       return () => {
         socket.off("init");
         socket.off("codeChange");
         socket.off("cursorMove");
-        socket.off("removeCursor");
+        socket.disconnect();
       };
     }
   }, [socket, roomID]);
-
-  useEffect(() => {
-    if (!containerRef.current) return;
-
-    const model = monaco.editor.createModel(
-      code,
-      language
-    );
-
-    const editor = monaco.editor.create(containerRef.current, {
-      model,
-      language: language,
-      theme: theme,
-      automaticLayout: true,
-    });
-
-    editorRef.current = editor;
-
-    // Setup Y.js & WebSocket Syncing
-    const ydoc = new Y.Doc();
-    const provider = new WebsocketProvider("ws://localhost:5001", "monaco-room", ydoc);
-    const yText = ydoc.getText("monaco");
-
-    // Bind Y.js text to Monaco model
-    new MonacoBinding(yText, model, new Set([editor]), provider.awareness);
-
-    // Handle remote cursor updates
-    socket.on("cursor-update", (data) => {
-      if (editor) {
-        editor.deltaDecorations(
-          [],
-          [
-            {
-              range: new monaco.Range(data.lineNumber, data.column, data.lineNumber, data.column + 1),
-              options: { className: "remote-cursor" },
-            },
-          ]
-        );
-      }
-    });
-
-    // Send cursor position on movement
-    editor.onDidChangeCursorPosition((event) => {
-      socket.emit("cursor-update", {
-        lineNumber: event.position.lineNumber,
-        column: event.position.column,
-      });
-    });
-
-    return () => {
-      editor.dispose();
-      provider.destroy();
-    };
-  }, []);
 
   useEffect(() => {
     if (selectedLink) {
@@ -383,6 +348,126 @@ const CodeEditor = () => {
     }
   }, [alertMessage]);
 
+  //update real time live cursor
+  useEffect(() => {
+    if (socket && editorRef.current) {
+
+      const userCursors = new Map(); // Store cursor decorations per user
+      const userColors = new Map();
+
+      socket.on('cursorMove', ({ id, cursor }) => {
+        console.log({ id, cursor })
+        const editor = editorRef.current;
+        if (!cursor || !cursor.lineNumber || !cursor.column) return;
+        // Assign a unique color if not already assigned
+
+        if (!userColors.has(id)) {
+          const color = getRandomColor();
+          userColors.set(id, color)
+          injectCursorStyle(id, color); // Apply the color
+        }
+
+        // Remove previous decoration if it exists
+        if (userCursors.has(id)) {
+          editor.deltaDecorations(userCursors.get(id), []);
+        }
+
+        // Add new decoration for this user's cursor
+        const newDecoration = editor.deltaDecorations([], [
+          {
+            range: new monaco.Range(cursor.lineNumber, cursor.column, cursor.lineNumber, cursor.column),
+            options: {
+              className: `remote-cursor cursor-${id}`, // Unique class per user
+              stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+            },
+          },
+        ]);
+
+        // Store the new decoration for this user
+        userCursors.set(id, newDecoration);
+
+        // Update userCursors state
+        setUserCursorsHoverEffect((prevCursors) => ({
+          ...prevCursors,
+          [id]: { decorationId: newDecoration[0], cursor },
+        }));
+
+      });
+
+      socket.on('removeCursor', (userId) => {
+        const editor = editorRef.current;
+
+        // Remove the cursor decoration for the disconnected user
+        if (userCursors.has(userId)) {
+          editor.deltaDecorations(userCursors.get(userId), []);
+        }
+
+        // Update userCursors state by removing the disconnected user
+        userCursors.delete(userId)
+        userColors.delete(userId)
+
+        // Update userCursors state by removing the disconnected user
+        setUserCursorsHoverEffect((prevCursors) => {
+          const newCursors = { ...prevCursors };
+          delete newCursors[userId];
+          return newCursors;
+        });
+
+      });
+
+      return () => {
+        socket.off('cursorMove');
+        socket.off('removeCursor');
+        socket.disconnect();
+      };
+    }
+
+  }, [socket, editorRef.current]);
+
+  //initial cursor positions
+  useEffect(() => {
+    if (editorRef.current && Object.keys(initialCursors).length !== 0) {
+
+      const userCursors = new Map(); // Store cursor decorations per user
+      const userColors = new Map();
+
+
+      Object.keys(initialCursors).forEach((id) => {
+
+        const cursor = initialCursors[id]
+
+        if (!cursor || !cursor.lineNumber || !cursor.column) return;
+
+        // Assign a unique color if not already assigned
+        if (!userColors.has(id)) {
+          const color = getRandomColor();
+          userColors.set(id, color);
+          injectCursorStyle(id, color); // Apply the color
+        }
+
+        // Remove previous decoration if it exists
+        if (userCursors.has(id)) {
+          editor.deltaDecorations(userCursors.get(id), []);
+        }
+
+        // Add new decoration for this user's cursor
+        const newDecoration = editor.deltaDecorations([], [
+          {
+            range: new monaco.Range(cursor.lineNumber, cursor.column, cursor.lineNumber, cursor.column),
+            options: {
+              className: `remote-cursor cursor-${id}`, // Unique class per user
+              stickiness: monaco.editor.TrackedRangeStickiness.NeverGrowsWhenTypingAtEdges,
+            },
+          },
+        ]);
+
+        // Store the new decoration for this user
+        userCursors.set(id, newDecoration);
+      })
+
+    }
+  }, [editorRef.current, initialCursors])
+
 
   return (
     <div
@@ -401,6 +486,7 @@ const CodeEditor = () => {
       <h2 className=" font-semibold p-4 mt-[80px] text-white text-2xl">AI-Assisted Code Editor</h2>
 
       <div className="controlers flex gap-2 w-full justify-start px-2 py-4 items-center">
+        {/* open or close navigation panel  */}
         <button
           onClick={toggleNav}
           className=" cursor-pointer bg-purple-500 text-white px-4 py-2 rounded-lg shadow-lg"
@@ -408,6 +494,7 @@ const CodeEditor = () => {
           {isNavOpen ? "Close Panel" : "Open Panel"}
         </button>
 
+        {/* all languages  */}
         <div className="language w-36 ">
           <select
             onChange={(e) => {
@@ -441,6 +528,7 @@ const CodeEditor = () => {
           </select>
         </div>
 
+        {/* all themes  */}
         <div className="theme w-36 ">
           <select
             onChange={(e) => {
@@ -470,6 +558,39 @@ const CodeEditor = () => {
             <option value="sunset-glow">Sunset Glow</option>
           </select>
         </div>
+
+        {/* undo btn  */}
+        <button id="undoBtn" className="w-10 h-8 bg-slate-700 rounded-xl px-2 cursor-pointer hover:bg-slate-800">
+          <svg version="1.0" xmlns="http://www.w3.org/2000/svg"
+            width="48.000000pt" height="48.000000pt" viewBox="0 0 48.000000 48.000000"
+            preserveAspectRatio="xMidYMid meet"
+            className="w-full h-full">
+
+            <g transform="translate(0.000000,48.000000) scale(0.100000,-0.100000)"
+              fill="#ffffff" stroke="none">
+              <path d="M40 252 l0 -92 92 0 92 0 -39 40 -39 40 37 15 c75 31 151 9 196 -56
+                  29 -43 31 -44 55 -26 17 12 16 16 -16 57 -44 58 -85 81 -156 87 -47 4 -65 0
+                  -104 -19 l-47 -25 -35 36 -36 36 0 -93z"/>
+            </g>
+          </svg>
+        </button>
+
+        {/* redo btn  */}
+        <button id="redoBtn" className="w-10 h-8 bg-slate-700 rounded-xl px-2 cursor-pointer hover:bg-slate-800">
+          <svg version="1.0" xmlns="http://www.w3.org/2000/svg"
+            width="96.000000pt" height="96.000000pt" viewBox="0 0 96.000000 96.000000"
+            preserveAspectRatio="xMidYMid meet"
+            className="w-full h-full">
+
+            <g transform="translate(0.000000,96.000000) scale(0.100000,-0.100000)"
+              fill="#ffffff" stroke="none">
+              <path d="M803 609 l-71 -72 -35 27 c-86 65 -224 91 -337 62 -122 -31 -220
+                  -110 -275 -219 -27 -54 -25 -58 25 -70 22 -5 28 -1 49 39 34 63 96 123 161
+                  153 74 35 201 37 270 5 95 -46 95 -42 5 -133 l-80 -81 183 0 182 0 0 180 c0
+                  99 -1 180 -3 180 -1 0 -34 -32 -74 -71z"/>
+            </g>
+          </svg>
+        </button>
       </div>
 
       <div className="flex h-[70vh] my-2">
@@ -489,7 +610,7 @@ const CodeEditor = () => {
         >
           <div className="h-full">
             <div ref={containerRef} id="monacoEditor" className="h-full relative">
-              {/* <MonacoEditor
+              <MonacoEditor
                 height="100%"
                 language={language}
                 theme={theme}
@@ -514,7 +635,7 @@ const CodeEditor = () => {
                   foldingStrategy: "auto",
                   showFoldingControls: "always",
                 }}
-              /> */}
+              />
             </div>
           </div>
         </div>
