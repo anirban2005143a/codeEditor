@@ -426,14 +426,14 @@ const CodeEditor = () => {
 
   //initial cursor positions
   useEffect(() => {
-    if (editorRef.current && Object.keys(initialCursors).length !== 0) {
+    if (editorRef.current && initialCursors && Object.keys(initialCursors).length !== 0) {
 
       const userCursors = new Map(); // Store cursor decorations per user
       const userColors = new Map();
 
 
       Object.keys(initialCursors).forEach((id) => {
-
+        const editor = editorRef.current
         const cursor = initialCursors[id]
 
         if (!cursor || !cursor.lineNumber || !cursor.column) return;
