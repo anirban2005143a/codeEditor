@@ -4,6 +4,8 @@ import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import twilio from "twilio";
 import otpgenerator from "otp-generator";
+import axios from "axios"
+
 const RegisterUser = async (req, res) => {
   try {
     const { username, email, password } = req.body;
@@ -187,10 +189,77 @@ const checkingotp =async (req, res) => {
   }
 };
 
+const languageVersionMap = {
+  nodejs: "0", // Use "nodejs" instead of "javascript"
+  javascript: "0", // Redirected to "nodejs"
+  typescript: "4",
+  python: "3",
+  java: "3",
+  c: "5",
+  cpp: "5", // Redirect to cpp17
+  cpp17: "5",
+  ruby: "2",
+  php: "3",
+  go: "3",
+  rust: "0",
+  kotlin: "2",
+  swift: "3",
+  r: "3",
+  perl: "3",
+  dart: "3",
+  haskell: "3",
+  xml: "0",
+  yaml: "0",
+  html: "0",
+  shell: "0",
+};
+
+const languageAliasMap = {
+  javascript: "nodejs", // JavaScript should use Node.js
+  cpp: "cpp17", // Use C++17 as the standard C++ version
+};
+
+const executeCode = async (req, res) => {
+  const { code, input, language } = req.body;
+
+  if (!code || !language) {
+    return res.status(400).json({ error: "Code and language are required" });
+  }
+
+  // Normalize language and handle aliases
+  const languageKey = languageAliasMap[language.toLowerCase()] || language.toLowerCase();
+  const versionIndex = languageVersionMap[languageKey];
+
+  if (!versionIndex) {
+    return res.status(400).json({ error: `Unsupported language: ${language}` });
+  }
+
+  try {
+    const response = await axios.post("https://api.jdoodle.com/v1/execute", {
+      clientId: process.env.JDOODLE_CLIENT_ID,
+      clientSecret: process.env.JDOODLE_CLIENT_SECRET,
+      script: code,
+      stdin: input || "",
+      language: languageKey,
+      versionIndex,
+      compileOnly: false,
+    });
+
+    console.log(response.data);
+    return res.json(response.data);
+  } catch (error) {
+    return res.status(500).json({
+      error: "Failed to execute code",
+      details: error.response?.data || error.message,
+    });
+  }
+};
+
 export {
   RegisterUser,
   LoginUser,
   checking_token,
   generateandsetOTP,
   checkingotp,
+  executeCode
 };
