@@ -1,6 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
 import MonacoEditor from "@monaco-editor/react";
 import { ToastContainer, toast } from 'react-toastify';
+import * as monaco from "monaco-editor";
+import { MonacoBinding } from "real-time-monaco";
+import * as Y from "yjs";
+import { WebsocketProvider } from "y-websocket";
+// import { MonacoBinding } from "y-monaco";
 
 // Auto complete for languages
 import registerCppCompletions from "../../languages/cpp/cpp";
@@ -46,61 +51,9 @@ const CodeEditor = () => {
   const editorRef = useRef(null);
   const monacoRef = useRef(null);
   const decorationsRef = useRef([]);
-  // Keep track of cursor colors for each user
+  const containerRef = useRef(null);
+  const [editor, setEditor] = useState(null);
 
-  useEffect(() => {
-
-    if (roomID && socket) {
-      console.log(socket.id);
-      socket.emit("joinRoom", roomID);
-
-      socket.on("init", ({ code, cursors }) => {
-        setCode(code);
-        setCursors(cursors);
-      });
-
-      socket.on("userJoined", (socketJoin) => {
-        console.log("user join " + socketJoin);
-      });
-
-      socket.on("errorMessage", (message) => {
-        console.log(message);
-        toast.error(message, {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: false,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "dark",
-        });
-      });
-
-      socket.on("codeChange", (newCode) => setCode(newCode));
-
-      socket.on("cursorMove", ({ id, cursor }) => {
-        setCursors((prev) => ({ ...prev, [id]: cursor }));
-        updateCursorDecorations();
-      });
-
-      socket.on("removeCursor", (id) => {
-        setCursors((prev) => {
-          const updated = { ...prev };
-          delete updated[id];
-          return updated;
-        });
-        updateCursorDecorations();
-      });
-
-      return () => {
-        socket.off("init");
-        socket.off("codeChange");
-        socket.off("cursorMove");
-        socket.off("removeCursor");
-      };
-    }
-  }, [socket, roomID]);
 
 
   const handleCodeChange = (value) => {
@@ -273,7 +226,6 @@ const CodeEditor = () => {
     decorationsRef.current = editor.deltaDecorations(decorationsRef.current, decorations);
   };
 
-
   //handel mount function 
   const handleEditorDidMount = (editor, monaco) => {
     editorRef.current = editor;
@@ -290,6 +242,113 @@ const CodeEditor = () => {
     });
   };
 
+
+  useEffect(() => {
+    if (roomID && socket) {
+      console.log(socket.id);
+      socket.emit("joinRoom", roomID);
+
+      socket.on("init", ({ code, cursors }) => {
+        setCode(code);
+        setCursors(cursors);
+      });
+
+      socket.on("userJoined", (socketJoin) => {
+        console.log("user join " + socketJoin);
+      });
+
+      socket.on("errorMessage", (message) => {
+        console.log(message);
+        toast.error(message, {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          closeOnClick: false,
+          pauseOnHover: true,
+          draggable: true,
+          progress: undefined,
+          theme: "dark",
+        });
+      });
+
+      socket.on("codeChange", (newCode) => setCode(newCode));
+
+      socket.on("cursorMove", ({ id, cursor }) => {
+        setCursors((prev) => ({ ...prev, [id]: cursor }));
+        updateCursorDecorations();
+      });
+
+      socket.on("removeCursor", (id) => {
+        setCursors((prev) => {
+          const updated = { ...prev };
+          delete updated[id];
+          return updated;
+        });
+        updateCursorDecorations();
+      });
+
+      return () => {
+        socket.off("init");
+        socket.off("codeChange");
+        socket.off("cursorMove");
+        socket.off("removeCursor");
+      };
+    }
+  }, [socket, roomID]);
+
+  useEffect(() => {
+    if (!containerRef.current) return;
+
+    const model = monaco.editor.createModel(
+      code,
+      language
+    );
+
+    const editor = monaco.editor.create(containerRef.current, {
+      model,
+      language: language,
+      theme: theme,
+      automaticLayout: true,
+    });
+
+    editorRef.current = editor;
+
+    // Setup Y.js & WebSocket Syncing
+    const ydoc = new Y.Doc();
+    const provider = new WebsocketProvider("ws://localhost:5001", "monaco-room", ydoc);
+    const yText = ydoc.getText("monaco");
+
+    // Bind Y.js text to Monaco model
+    new MonacoBinding(yText, model, new Set([editor]), provider.awareness);
+
+    // Handle remote cursor updates
+    socket.on("cursor-update", (data) => {
+      if (editor) {
+        editor.deltaDecorations(
+          [],
+          [
+            {
+              range: new monaco.Range(data.lineNumber, data.column, data.lineNumber, data.column + 1),
+              options: { className: "remote-cursor" },
+            },
+          ]
+        );
+      }
+    });
+
+    // Send cursor position on movement
+    editor.onDidChangeCursorPosition((event) => {
+      socket.emit("cursor-update", {
+        lineNumber: event.position.lineNumber,
+        column: event.position.column,
+      });
+    });
+
+    return () => {
+      editor.dispose();
+      provider.destroy();
+    };
+  }, []);
 
   useEffect(() => {
     if (selectedLink) {
@@ -329,15 +388,15 @@ const CodeEditor = () => {
     <div
       id="editor"
       className="md:p-4 p-2 bg-black"
-      // style={{
-      //   backgroundImage: "linear-gradient(135deg, #fdfcfb 0%, #e2d1c3 100%)",
-      // }}
+    // style={{
+    //   backgroundImage: "linear-gradient(135deg, #fdfcfb 0%, #e2d1c3 100%)",
+    // }}
     >
       {/* toasify for notification alert  */}
       <ToastContainer />
 
       {/* navbar  */}
-      <Navbar/>
+      <Navbar />
 
       <h2 className=" font-semibold p-4 mt-[80px] text-white text-2xl">AI-Assisted Code Editor</h2>
 
@@ -429,8 +488,8 @@ const CodeEditor = () => {
           style={{ width: isNavOpen ? "80%" : "100%" }}
         >
           <div className="h-full">
-            <div id="monacoEditor" className="h-full relative">
-              <MonacoEditor
+            <div ref={containerRef} id="monacoEditor" className="h-full relative">
+              {/* <MonacoEditor
                 height="100%"
                 language={language}
                 theme={theme}
@@ -455,7 +514,7 @@ const CodeEditor = () => {
                   foldingStrategy: "auto",
                   showFoldingControls: "always",
                 }}
-              />
+              /> */}
             </div>
           </div>
         </div>

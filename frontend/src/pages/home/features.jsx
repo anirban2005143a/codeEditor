@@ -37,8 +37,8 @@ const Features = () => {
   return (
     <div id='Features' className='bg-black border-t-[1px] border-white perspective-[1000px]'>
 
-      <section className='f1 relative flex sm:flex-row flex-col justify-center items-center py-10 px-2 '>
-        <div className='visual w-[40%] md:p-10 sm:p-8 p-4 '>
+      <section className='f1 relative flex md:flex-row flex-col justify-center items-center py-10 px-2 '>
+        <div className='visual md:w-[40%] w-full md:p-10 sm:p-8 p-4 '>
           <img
             // onMouseOver={(e) => {
             //   // animateFeatureImgEnter(e)
@@ -54,18 +54,18 @@ const Features = () => {
             // }}
             src={img} alt="" className=' transition-all duration-150 ease-in-out w-full object-cover rounded-xl ' style={{ boxShadow: "rgba(50, 50, 93, 0.25) 0px 50px 100px -10px, rgba(145, 143, 142, 0.3) 0px 5px 60px 0px" }} />
         </div>
-        <div className='content w-[60%] md:p-10 sm:p-8 p-4 text-white border-l-2 '>
+        <div className='content md:w-[60%] w-full md:p-10 sm:p-8 p-4 text-white md:border-l-2  md:border-t-0  border-t-2 '>
           <h2 className="text-4xl font-bold mb-6 text-white">Feature 1: Responsive Design</h2>
           <p className="text-white mb-8">Our website is fully responsive, ensuring a seamless experience across all devices.</p>
         </div>
       </section>
 
       <section className='f2 z-20 relative flex sm:flex-row-reverse flex-col justify-center items-center py-10 px-2'>
-        <div className='visual w-[40%] md:p-10 sm:p-8 p-4 '>
+        <div className='visual md:w-[40%] w-full md:p-10 sm:p-8 p-4 '>
           <img
             src={img} alt="" className=' transition-all duration-150 ease-in-out w-full object-cover rounded-xl ' style={{ boxShadow: "rgba(50, 50, 93, 0.25) 0px 50px 100px -10px, rgba(145, 143, 142, 0.3) 0px 5px 60px 0px" }} />
         </div>
-        <div className='content w-[60%] md:p-10 sm:p-8 p-4 text-white border-r-2'>
+        <div className=' content md:w-[60%] w-full md:p-10 sm:p-8 p-4 text-white md:border-r-2 border-t-2  md:border-t-0 '>
           <h2 className="text-4xl font-bold mb-6 text-white">Feature 1: Responsive Design</h2>
           <p className="text-white mb-8">Our website is fully responsive, ensuring a seamless experience across all devices.</p>
         </div>
@@ -73,20 +73,20 @@ const Features = () => {
 
 
       <section className='f3 z-20 relative flex sm:flex-row flex-col justify-center items-center py-10 px-2 '>
-        <div ref={featureImgRef3} className='visual w-[40%] md:p-10 sm:p-8 p-4 '>
+        <div className='visual md:w-[40%] w-full md:p-10 sm:p-8 p-4 '>
           <img src={img} alt="" className=' w-full object-cover rounded-xl' />
         </div>
-        <div className='content w-[60%] md:p-10 sm:p-8 p-4 text-white border-l-2 '>
+        <div className='content md:w-[60%] w-full md:p-10 sm:p-8 p-4 text-white md:border-l-2  md:border-t-0 border-t-2 '>
           <h2 className="text-4xl font-bold mb-6 text-white">Feature 1: Responsive Design</h2>
           <p className="text-white mb-8">Our website is fully responsive, ensuring a seamless experience across all devices.</p>
         </div>
       </section>
 
       <section className='f4 z-20 relative flex sm:flex-row-reverse flex-col justify-center items-center py-10 px-2 '>
-        <div ref={featureImgRef4} className='visual w-[40%] md:p-10 sm:p-8 p-4 '>
+        <div className='visual md:w-[40%] w-full md:p-10 sm:p-8 p-4 '>
           <img src={img} alt="" className=' w-full object-cover rounded-xl' />
         </div>
-        <div className='content w-[60%] md:p-10 sm:p-8 p-4 text-white border-r-2 '>
+        <div className='content md:w-[60%] w-full md:p-10 sm:p-8 p-4 text-white md:border-r-2 md:border-t-0 border-t-2 '>
           <h2 className="text-4xl font-bold mb-6 text-white">Feature 1: Responsive Design</h2>
           <p className="text-white mb-8">Our website is fully responsive, ensuring a seamless experience across all devices.</p>
         </div>

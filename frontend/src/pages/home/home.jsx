@@ -25,7 +25,7 @@ const Home = () => {
             <MousePointer />
 
             {/* random shapes  */}
-            <div className='z-0 scale-150 rotate-45 fixed -top-10 left-0 w-80 h-80'>
+            <div className='z-0 scale-150 rotate-90 fixed -top-0 left-10 md:w-[40%] md:h-[40%] w-80 h-80 '>
                 <svg className='' id="sw-js-blob-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                     <defs>
                         <linearGradient id="sw-gradient" x1="0" x2="1" y1="1" y2="0">
@@ -37,7 +37,7 @@ const Home = () => {
                     </path>
                 </svg>
             </div>
-            <div className='z-0 scale-150 -rotate-12 fixed -bottom-10 -right-10 w-80 h-80'>
+            <div className='z-0 scale-150 -rotate-15 fixed bottom-20 -right-20 md:w-[40%] md:h-[40%] w-80 h-80'>
                 <svg id="sw-js-blob-svg" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
                     <defs>
                         <linearGradient id="sw-gradient" x1="0" x2="1" y1="1" y2="0">

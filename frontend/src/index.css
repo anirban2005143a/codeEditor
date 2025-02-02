@@ -15,9 +15,8 @@
 .remote-cursor {
   position: absolute;
   width: 2px;
+  background-color: red;
   height: 1em;
-  background-color: red; /* Customize cursor color */
-  z-index: 10;
 }
 
 .cursor-label::after {
