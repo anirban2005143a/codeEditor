@@ -47,7 +47,7 @@ const Privateroutes = ({ children }) => {
 
   if (isLoading) {
     return (
-      <div
+      <div className=" w-[100vh] h-[100vh] "
         style={{
           display: "flex",
           justifyContent: "center",

@@ -3,12 +3,34 @@ import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
+import { account } from "./AppWrite";
 
 function SignInPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isload, setIsload] = useState(false);
   const navigate = useNavigate();
+
+  const handleLoginGoogle = async () => {
+    try {
+        const response = await axios.get('http://localhost:4000/api/haxplore/user/tokengeneration');
+  
+      localStorage.setItem("token", response.data.jwttoken);
+  
+      console.log("Token saved in localStorage.");
+  
+      console.log("Redirecting to Google login...");
+  
+      await account.createOAuth2Session(
+        "google",
+        "http://localhost:5173",
+        "http://localhost:5173/fail"
+      );
+    } catch (error) {
+      console.error("Error during the login process:", error);
+    }
+  };
+
   const handlelogin = async (e) => {
     try {
       e.preventDefault();
@@ -45,6 +67,8 @@ function SignInPage() {
       setIsload(false);
     }
   };
+
+
   return (
     <>
       <div className="flex items-center justify-center h-screen bg-gray-50">
@@ -120,7 +144,7 @@ function SignInPage() {
             {isload ? (
               <>
                 {" "}
-                <div
+                <div className=" w-[100vh] h-[100vh] "
                   style={{
                     display: "flex",
                     justifyContent: "center",
@@ -135,8 +159,9 @@ function SignInPage() {
             )}
             <div className="text-center text-gray-500">or</div>
             <button
+            onClick={handleLoginGoogle}
               type="button"
-              className="w-full px-4 py-2 text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300"
+              className="w-full px-4 py-2 cursor-pointer text-gray-700 bg-gray-100 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300"
             >
               Sign in with Google
             </button>

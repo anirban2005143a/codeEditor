@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
+import logo from "../../assets/logo.png"
 
 const Navbar = (props) => {
 
@@ -19,11 +19,6 @@ const Navbar = (props) => {
     const id = `${getRandomChar()}${getRandomChar()}${getRandomChar()}-${getRandomChar()}${getRandomChar()}${getRandomChar()}-${getRandomChar()}${getRandomChar()}${getRandomChar()}`;
     console.log(id);
     setroomId(id);
-  };
-
-  const handling = () => {
-    console.log("Room ID:");
-    navigate(`/editor?${roomId}`);
   };
 
   const handleCollaborateClick = () => {
@@ -58,104 +53,16 @@ const Navbar = (props) => {
       <nav id="navbar" className="fixed top-0 left-0 w-full z-50 border-gray-200 ">
 
         <div className="max-w-screen-xl flex flex-wrap items-center justify-between mx-auto p-4">
-          <a className="flex items-center space-x-3 rtl:space-x-reverse">
+          <Link to="/" className=" cursor-pointer flex items-center space-x-3 rtl:space-x-reverse">
             <img
-              src="https://flowbite.com/docs/images/logo.svg"
+              src={logo}
               className="h-8"
               alt="Flowbite Logo"
             />
             <span className="self-center text-2xl font-semibold whitespace-nowrap dark:text-white">
-              Flowbite
+              Code Editor
             </span>
-          </a>
-          <div className="flex items-center md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse">
-            <button
-              type="button"
-              className="flex text-sm bg-gray-800 rounded-full md:me-0 focus:ring-4 focus:ring-gray-300 dark:focus:ring-gray-600"
-              id="user-menu-button"
-              aria-expanded="false"
-              data-dropdown-toggle="user-dropdown"
-              data-dropdown-placement="bottom"
-            >
-              <span className="sr-only">Open user menu</span>
-              <img
-                className="w-8 h-8 rounded-full"
-                src="/docs/images/people/profile-picture-3.jpg"
-                alt="user photo"
-              />
-            </button>
-            <div
-              className="z-50 hidden my-4 text-base list-none bg-white divide-y divide-gray-100 rounded-lg shadow-sm dark:bg-gray-700 dark:divide-gray-600"
-              id="user-dropdown"
-            >
-              <div className="px-4 py-3">
-                <span className="block text-sm text-gray-900 dark:text-white">
-                  Bonnie Green
-                </span>
-                <span className="block text-sm  text-gray-500 truncate dark:text-gray-400">
-                  name@flowbite.com
-                </span>
-              </div>
-              <ul className="py-2" aria-labelledby="user-menu-button">
-                <li>
-                  <a
-                    href="#"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
-                  >
-                    Dashboard
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
-                  >
-                    Settings
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
-                  >
-                    Earnings
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:hover:bg-gray-600 dark:text-gray-200 dark:hover:text-white"
-                  >
-                    Sign out
-                  </a>
-                </li>
-              </ul>
-            </div>
-            <button
-              data-collapse-toggle="navbar-user"
-              type="button"
-              className="inline-flex items-center p-2 w-10 h-10 justify-center text-sm text-gray-500 rounded-lg md:hidden hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-200 dark:text-gray-400 dark:hover:bg-gray-700 dark:focus:ring-gray-600"
-              aria-controls="navbar-user"
-              aria-expanded="false"
-            >
-              <span className="sr-only">Open main menu</span>
-              <svg
-                className="w-5 h-5"
-                aria-hidden="true"
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 17 14"
-              >
-                <path
-                  stroke="currentColor"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M1 1h15M1 7h15M1 13h15"
-                />
-              </svg>
-            </button>
-          </div>
+          </Link>
           <div
             className="items-center justify-between hidden w-full md:flex md:w-auto md:order-1"
             id="navbar-user"
@@ -197,7 +104,6 @@ const Navbar = (props) => {
         <div className="fixed inset-0 flex items-center justify-center backdrop-blur-[5px] bg-[#2020236b] z-50">
           <div className="bg-[#4b5563] p-8 rounded-lg shadow-2xl md:w-[600px] w-[97%] transform transition-all duration-300 ease-in-out hover:scale-100">
             <div className="flex justify-end">
-
 
               <button
                 onClick={handleCloseModal}
@@ -241,7 +147,9 @@ const Navbar = (props) => {
                   <div className="flex justify-center items-center gap-12 h-full mt-4 cursor-pointer">
                     <div className=" p-[4px] rounded-[16px]">
                       <button
-                        onClick={handling}
+                        onClick={() => {
+                          navigate(`/editor?${roomId}`);
+                        }}
                         type="button"
                         className="text-white cursor-pointer bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700">
                         Enter the Room
@@ -252,9 +160,12 @@ const Navbar = (props) => {
               ) : check === "enter" ? (
                 <div className="flex flex-col items-center gap-4">
 
-
                   <form
-                    onSubmit={() => console.log("Entering room:", inroomId)}
+                    onSubmit={() => {
+                      if (roomId.length === 9) {
+                        navigate(`/editor?${roomId}`)
+                      }
+                    }}
                     className="flex flex-col justify-center items-center max-w-sm mx-auto">
                     <label for="simple-search" className="sr-only">Search</label>
                     <div className="relative w-full">
@@ -263,7 +174,9 @@ const Navbar = (props) => {
                           <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5v10M3 5a2 2 0 1 0 0-4 2 2 0 0 0 0 4Zm0 10a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm12 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm0 0V6a3 3 0 0 0-3-3H9m1.5-2-2 2 2 2" />
                         </svg>
                       </div>
-                      <input type="text" id="simple-search" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search branch name..." required />
+                      <input type="text" autoComplete={false} onChange={(e) => {
+                        setroomId(e.target.value)
+                      }} id="simple-search" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full ps-10 p-2.5  dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" placeholder="Search branch name..." required />
                     </div>
                     <button type="submit"
                       className=" m-3 cursor-pointer text-white bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 me-2 mb-2 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700">

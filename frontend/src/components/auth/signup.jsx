@@ -127,7 +127,7 @@ function SignUpPage() {
             {isload ? (
               <>
                 {" "}
-                <div
+                <div className=" w-[100vh] h-[100vh] "
                   style={{
                     display: "flex",
                     justifyContent: "center",

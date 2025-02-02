@@ -84,7 +84,7 @@ const PhoneNumberPage = () => {
         {isload ? (
           <>
             {" "}
-            <div
+            <div className=" w-full h-full"
               style={{
                 display: "flex",
                 justifyContent: "center",

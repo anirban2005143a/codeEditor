@@ -64,7 +64,8 @@ const LandingPage = () => {
                 <p className=' playfair-display-font md:text-7xl sm:text-6xl text-4xl editor'>EDITOR</p>
             </div>
             <div className=" w-full h-[50%] flex flex-col items-start justify-center ">
-                <p className='md:w-[60%] sm:w-[80%] w-full z-10 relative intoduction text-white text-[1.2rem] py-4 md:px-8 px-4  font-extralight'> Lorem ipsum dolor sit amet, consectetur adipisicing elit. Sequi possimus dolores aut veniam necessitatibus totam laborum libero tempora,</p>
+                <p className='md:w-[60%] sm:w-[80%] w-full z-10 relative intoduction text-white text-[1.2rem] py-4 md:px-8 px-4  font-extralight'>
+                    The AI-Assisted Code Editor is a lightweight, smart environment for real-time collaboration and AI-driven assistance. It offers auto-completion, syntax highlighting, AI-powered documentation, secure authentication, multi-user editing, and a customizable UI for a seamless coding experience.                </p>
                 <div className='getStartedBtn py-4'>
                     <div className=" md:px-8 px-4 flex sm:justify-start justify-center items-center">
                         <div className="relative group">

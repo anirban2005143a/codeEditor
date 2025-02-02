@@ -255,11 +255,34 @@ const executeCode = async (req, res) => {
   }
 };
 
+const generatingtoken = async (req, res) => {
+  try {
+    const email = "ano";
+    const _id = "uiser";
+    const jsonewbestoken = jwt.sign(
+      { email, _id },
+      process.env.Authentication_for_jsonwebtoken,
+      { expiresIn: "24h" }
+    );
+    return res.status(200).json({
+      message: "Token generated successfully",
+      success: true,
+      jwttoken: jsonewbestoken,
+    });
+  } catch (error) {
+    console.log(error);
+    return res.status(404).json({
+      error: error,
+    });
+  }
+};
+
 export {
   RegisterUser,
   LoginUser,
   checking_token,
   generateandsetOTP,
   checkingotp,
-  executeCode
+  executeCode,
+  generatingtoken
 };

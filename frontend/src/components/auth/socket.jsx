@@ -9,10 +9,10 @@ const CreateRoom = () => {
     console.log("wjkbvfwbv")
     sets(socket);
     if (s && roomName) {
-        console.log(roomName);
+      console.log(roomName);
       socket.emit("joinRoom", roomName);
       socket.on("message", (msg) => {
-        console.log(msg);   
+        console.log(msg);
       });
     }
     return () => {
