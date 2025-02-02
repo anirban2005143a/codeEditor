@@ -3,13 +3,14 @@ import React, { useRef, useState } from "react";
 import { gsap } from "gsap";
 import { useEffect } from "react";
 import axios from "axios"
+import { toast, ToastContainer } from "react-toastify"
 
-const ErrorSuggestion = () => {
+const ErrorSuggestion = (props) => {
 
     const sidebarRef = useRef(null);
     const [isDragging, setIsDragging] = useState(false);
     const [sidebarWidth, setSidebarWidth] = useState(300);
-    const [Code, setCode] = useState(null)
+    const [Code, setCode] = useState(props.code)
     const [output, setoutput] = useState(null)
 
     // Function to close the sidebar
@@ -43,59 +44,76 @@ const ErrorSuggestion = () => {
         document.removeEventListener("mouseup", handleMouseUp);
     };
 
-    //get error suggetion
-    const getSuggetion = async () => {
+    console.log(props.code)
 
-        toast.success("Answer is generating, wait...");
+    const handleGenerateCode = async () => {
         try {
-            const data = {
-                contents: [
-                    {
-                        role: "developer",
-                        parts: [
-                            {
-                                text: "you are excelent in coding . Your task is to Find the error in the provided code and send the correct code making edited portion bold or highlighted . Don't send any other any comments except the correct code .",
-                            },
-                        ],
-                    },
-                    {
-                        role: "user",
-                        parts: [
-                            {
-                                text: `my code is - ${Code} 
-                                        Please find the error in the code and send the correct code without comments to me.`,
-                            },
-                        ],
-                    },
-                ],
-            };
+            console.log(`${import.meta.env.VITE_REACT_FLASK_URL}/error_detect`)
+            const response = await fetch(`${import.meta.env.VITE_REACT_FLASK_URL}/error_detect`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json", // Set content type to JSON
+                },
+                body: JSON.stringify({ code_prompt: Code }), // JSON payload
+            });
 
-            const response = await axios.post(
-                `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key=AIzaSyCwQO4zmsvP9KEpgYxl4bDD8reOqgE_dcA`,
-                data
-            );
-
-            if (!response) {
-                console.log("Having error in getting AI data");
-                toast.error("Having error in getting AI data");
-                return;
+            if (!response.ok) {
+                console.log("error")
+                // throw new Error(`HTTP error! Status: ${response.status}`);
+                toast.error('HTTP error! Status: ${response.status}', {
+                    position: "top-right",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: false,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "light",
+                });
             }
 
-            const aiResponse = response.data.candidates[0].content.parts[0].text;
-            console.log(aiResponse);
-        } catch (error) {
-            console.log(error);
-            console.log(
-                "Having error while getting data " +
-                `error?.response?.data?.error?.message`
-            );
-            toast.error(
-                `Something went wrong ${error?.response?.data?.error?.message}`
-            );
+            const data = await response.json();
+            console.log(data)
+            if (data.error) {
+                console.log(data.error)
+                toast.error('Some error occure please try again', {
+                    position: "top-right",
+                    autoClose: 5000,
+                    hideProgressBar: false,
+                    closeOnClick: false,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "light",
+                });
+            } else {
+                // formatCodeWithLineBreaks(data.generated_code)
+                const str = formatCodeWithLineBreaks(data.generated_code)
+                setoutput(str);
+            }
+        } catch (err) {
+            toast.error(err.message, {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: false,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+            });
+            console.log(err.message);
         }
-
     };
 
+    const formatCodeWithLineBreaks = (str) => {
+        return str.split('\n').map((line, index) => (
+            <React.Fragment key={index}>
+                {line}
+                <br />
+            </React.Fragment>
+        ));
+    };
 
     return (
 
@@ -105,6 +123,8 @@ const ErrorSuggestion = () => {
             id="ErrorSuggetion"
             className=" rounded-xl z-40 fixed top-[15vh] right-0 min-h-[50vh] max-h-[70vh] overflow-x-visible overflow-y-auto bg-gray-900 shadow-lg transform translate-x-full"
         >
+            <ToastContainer />
+
             <div className=" relative w-full h-full py-15 ">
 
                 {/* Resize handle */}
@@ -125,7 +145,7 @@ const ErrorSuggestion = () => {
                     <textarea
                         className="w-full h-32 p-2 bg-gray-800 text-white rounded min-h-20"
                         placeholder="Type something..."
-                        value={Code}
+                        value={props.code}
                         onChange={(e) => {
                             setCode(e.target.value)
                         }}
@@ -135,7 +155,11 @@ const ErrorSuggestion = () => {
 
                 {/* Send button */}
                 <div className="p-4" >
-                    <button className="w-full bg-blue-500 text-white px-4 py-2 rounded cursor-pointer">
+                    <button
+                        onClick={() => {
+                            if (Code) handleGenerateCode()
+                        }}
+                        className="w-full bg-blue-500 text-white px-4 py-2 rounded cursor-pointer">
                         Find Error
                     </button>
                 </div >

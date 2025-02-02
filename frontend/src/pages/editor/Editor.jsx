@@ -542,6 +542,7 @@ const CodeEditor = () => {
     }
   }, [editorRef.current, initialCursors])
 
+  console.log(code)
 
   return (
     <div
@@ -816,7 +817,7 @@ const CodeEditor = () => {
 
       {isCollaboration && <Livechat />}
 
-      <ErrorSuggestion />
+      <ErrorSuggestion code={code} />
       <AiSupport />
 
     </div>
