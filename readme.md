@@ -4,6 +4,26 @@ A lightweight code editor with real-time collaboration, AI-powered code assistan
 
 ## Key Features
 
+source code - https://github.com/anirban2005143a/codeEditor
+
+**Instructions to run**
+  1. install node js and python in local system
+  2. create a directory
+  3. clone this git repo in the newly created directory
+  4. change directory to codeEditor or codeEditor-main ( **cd codeEditor** or **cd codeEditor-main** )
+  5. open three termials in vscode
+  6. 1st terminal -  **cd frontend**
+                     **npm i**
+                     **npm run dev**
+  7. 2nd terminal -  **cd backend**
+                     **npm i**
+                     **npm run dev**
+  8. erd terminal - **cd flask**
+                     **pip install**
+                     **.\Script\activate**
+                     **python .\app.py**
+  9. open browser and browse **http://localhost:5173/** ( or check the 1st terminal , there should me a url , browse it)
+  
 - **Code Editor**:
   - Syntax highlighting with multiple themes.
   - Word wrap and line numbering for better readability.
