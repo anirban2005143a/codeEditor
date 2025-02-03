@@ -34,7 +34,6 @@ import Livechat from "../../components/live chat/livechat";
 import ErrorSuggestion from "../../components/errorSuggetion/ErrorSuggetion";
 import AiSupport from "../../components/aiSupport/AiSupport";
 
-const socketIoServer = io(`${import.meta.env.VITE_REACT_BACKEND_URL}`);
 
 const CodeEditor = () => {
   const [input, setinput] = useState("Write Input...")
@@ -48,22 +47,25 @@ const CodeEditor = () => {
   const [alertMessage, setalertMessage] = useState("");
   const [code, setCode] = useState("// Start coding...");
   const [roomID, setroomID] = useState(window.location.href.split("?")[1]);
-  const [socket, setSocket] = useState(socketIoServer);
+  const [socket, setSocket] = useState(null);
   const [initialCursors, setinitialCursors] = useState(null)
   const [userCursorsHoverEffect, setUserCursorsHoverEffect] = useState({}); // { userId: { decorationId, position } }
-  const [isCollaboration, setisCollaboration] = useState(true)
+  const [isCollaboration, setisCollaboration] = useState(false)
+  const [currentRemoteStatus, setcurrentRemoteStatus] = useState("")
 
   const mainRef = useRef(null);
   const editorRef = useRef(null);
   const monacoRef = useRef(null);
   const containerRef = useRef(null);
 
+  // console.log(roomID, isCollaboration)
+
   //make sure the crolling of page
   document.body.style.overflowY = "auto";
 
   const handleCodeChange = (value) => {
     setCode(value); // Update the local code state
-    socket.emit("codeChange", { roomID, code: value }); // Emit updated code to other users
+    socket.emit("codeChange", { roomID, code: value, name: localStorage.getItem("username") || "unknown" }); // Emit updated code to other users
   };
 
   const changeLanguage = (monaco) => {
@@ -303,7 +305,7 @@ const CodeEditor = () => {
           language,
         }
       );
-      console.log(result);
+      // console.log(result);
       if (result.data.error) {
         setalertMessage(error.message)
       } else {
@@ -332,7 +334,7 @@ const CodeEditor = () => {
           progress: undefined,
           theme: "light",
         });
-        console.log("Response updated:", result);
+        // console.log("Response updated:", result);
       }
 
     } catch (error) {
@@ -367,21 +369,30 @@ const CodeEditor = () => {
     }
   }
 
-  console.log(output)
+  // console.log(output)
   // useEffect 
   useEffect(() => {
-    if (roomID && socket) {
+    const socketIoServer = io(`${import.meta.env.VITE_REACT_BACKEND_URL}`);
+    setSocket(socketIoServer)
+  }, [])
+  
+
+  useEffect(() => {
+    if (roomID && socket && roomID.length === 11) {
       console.log(socket.id);
-      socket.emit("joinRoom", roomID);
+      socket.emit("joinRoom", { roomID, name: localStorage.getItem("username") || "unknown" });
 
       socket.on("init", ({ code, cursors }) => {
         setCode(code);
         setinitialCursors(cursors)
+        console.log("dvfrvr")
+        setisCollaboration(true)
       });
 
-      socket.on("userJoined", (socketJoin) => {
+      socket.on("userJoined", ({ id, name }) => {
         setisCollaboration(true)
-        console.log("user join " + socketJoin);
+        setcurrentRemoteStatus( name + " join ")
+        console.log("user join " + id);
       });
 
       socket.on("errorMessage", (message) => {
@@ -398,7 +409,10 @@ const CodeEditor = () => {
         });
       });
 
-      socket.on("codeChange", (newCode) => setCode(newCode));
+      socket.on("codeChange", ({ newCode, name }) => {
+        setcurrentRemoteStatus(name + " is typing ...")
+        setCode(newCode)
+      });
 
       return () => {
         socket.off("init");
@@ -562,7 +576,27 @@ const CodeEditor = () => {
     }
   }, [editorRef.current, initialCursors])
 
-  console.log(code)
+  // make navigation side panel remove on collaboration mode 
+  useEffect(() => {
+    if (isCollaboration) setIsNavOpen(false)
+    else setIsNavOpen(true)
+  }, [isCollaboration])
+
+  // make current status empty after each changes 
+  useEffect(() => {
+    let interval
+    if (currentRemoteStatus !== "") {
+      console.log(currentRemoteStatus)
+      interval = setTimeout(() => {
+        setcurrentRemoteStatus("")
+      }, 5000);
+    } else {
+      if(interval) clearInterval(interval)
+    }
+  }, [currentRemoteStatus])
+
+
+  console.log(currentRemoteStatus)
 
   return (
     <div
@@ -577,16 +611,17 @@ const CodeEditor = () => {
 
       <h2 className=" font-semibold p-4 mt-[80px] text-white text-2xl">AI-Assisted Code Editor</h2>
 
+      {/* all buttons  */}
       <div className="controlers flex flex-wrap  w-full justify-between items-center px-2 py-4 ">
         <div className="controlBtns flex flex-wrap items-center justify-start gap-2">
 
           {/* open or close navigation panel  */}
-          <button
+          {!isCollaboration && window.innerWidth>=768 && <button
             onClick={toggleNav}
             className=" cursor-pointer bg-purple-500 text-white px-4 py-2 rounded-lg shadow-lg"
           >
             {isNavOpen ? "Close Panel" : "Open Panel"}
-          </button>
+          </button>}
 
           {/* all languages  */}
           <div className="language w-36 ">
@@ -688,7 +723,7 @@ const CodeEditor = () => {
         </div>
 
         {/* ai suggestions  */}
-        <div className="aiFeatureBtn flex flex-wrap justify-start items-center">
+        <div className="aiFeatureBtn flex flex-wrap justify-start py-2 items-center">
           {/* ai suggestion btn  */}
           <button
             onClick={() => {
@@ -712,56 +747,62 @@ const CodeEditor = () => {
 
       </div>
 
-      <div className="flex h-[70vh] my-2">
-        <NavigationPanel
-          selectedLink={selectedLink}
-          setSelectedLink={setSelectedLink}
-          isNavOpen={isNavOpen}
-          addedLinks={addedLinks}
-          setAddedLinks={setAddedLinks}
-          newlyAddedLink={newlyAddedLink}
-          setnewlyAddedLink={setnewlyAddedLink}
-        />
-        <div
-          ref={mainRef}
-          className="h-full transition-all duration-150"
-          style={{ width: isNavOpen ? "80%" : "100%" }}
-        >
-          <div className="h-full">
-            <div ref={containerRef} id="monacoEditor" className="h-full relative">
-              <MonacoEditor
-                height="100%"
-                language={language}
-                theme={theme}
-                value={code}
-                onChange={handleCodeChange}
-                onMount={handleEditorDidMount}
-                options={{
-                  readOnly: selectedLink ? false : true,
-                  automaticLayout: true,
-                  suggestOnTriggerCharacters: true,
-                  quickSuggestions: {
-                    other: true,
-                    comments: true,
-                    strings: true,
-                  },
-                  minimap: { enabled: true },
-                  formatOnType: true,
-                  lineNumbers: "on",
-                  suggest: { snippetsPreventQuickSuggestions: false },
-                  folding: true,
-                  foldingHighlight: true,
-                  foldingStrategy: "auto",
-                  showFoldingControls: "always",
-                }}
-              />
+      {/* work space  */}
+      <div className="workSpace">
+        <div className="CurrentStatus text-white text-base font-normal text-end h-7 px-4">{currentRemoteStatus}</div>
+        <div className="flex md:flex-row flex-col h-[70vh] my-2">
+          {/* navigation panel  */}
+          {!isCollaboration && <NavigationPanel
+            selectedLink={selectedLink}
+            setSelectedLink={setSelectedLink}
+            isNavOpen={isNavOpen}
+            addedLinks={addedLinks}
+            setAddedLinks={setAddedLinks}
+            newlyAddedLink={newlyAddedLink}
+            setnewlyAddedLink={setnewlyAddedLink}
+          />}
+          {/* editor  */}
+          <div
+            ref={mainRef}
+            className="h-full transition-all duration-150"
+            style={{ width: window.innerWidth >= 768 ? isNavOpen ? "80%" : "100%" : "100%"}}
+          >
+            <div className="h-full">
+              <div ref={containerRef} id="monacoEditor" className="h-full relative">
+                <MonacoEditor
+                  height="100%"
+                  language={language}
+                  theme={theme}
+                  value={code}
+                  onChange={handleCodeChange}
+                  onMount={handleEditorDidMount}
+                  options={{
+                    readOnly: selectedLink ? false : true,
+                    automaticLayout: true,
+                    suggestOnTriggerCharacters: true,
+                    quickSuggestions: {
+                      other: true,
+                      comments: true,
+                      strings: true,
+                    },
+                    minimap: { enabled: true },
+                    formatOnType: true,
+                    lineNumbers: "on",
+                    suggest: { snippetsPreventQuickSuggestions: false },
+                    folding: true,
+                    foldingHighlight: true,
+                    foldingStrategy: "auto",
+                    showFoldingControls: "always",
+                  }}
+                />
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       {/* input field for code  */}
-      <h2 className=" px-2 font-medium ">Input</h2>
+      <h2 className=" px-2 font-medium my-4">Input</h2>
       <div id="input" className=" m-1 md:m-2 min-h-[20vh]">
         <div className="w-full mb-4 border border-gray-200 rounded-lg bg-gray-50 dark:bg-gray-700 dark:border-gray-600">
           <div className="p-4 bg-white rounded-t-lg dark:bg-gray-800">
@@ -821,7 +862,7 @@ const CodeEditor = () => {
       </div>
 
       {/* output field for code  */}
-      <h2 className=" px-2 font-medium ">Output</h2>
+      <h2 className=" px-2 font-medium my-4">Output</h2>
       <div className="OutputInfo flex justify-end px-4 gap-4 font-light text-sm ">
         {/* status Code  */}
         <div className={`statusCode ${output.status === 200 ? " text-green-600 " : " text-red-700 "} `}>Status: {output.status}</div>

@@ -3,26 +3,47 @@ import { io } from "socket.io-client";
 import "./livechat.css"
 
 const Livechat = () => {
-    const socketIoServer = io(`${import.meta.env.VITE_REACT_BACKEND_URL}`);
 
     const [isChatOpen, setIsChatOpen] = useState(false);
     const [messages, setMessages] = useState([]);
     const [chatMessage, setChatMessage] = useState("");
-    const [socket, setsocket] = useState(socketIoServer)
+    const [socket, setsocket] = useState(null)
 
     const sendMessage = (e) => {
         e.preventDefault();
-        const newMessage = { user: "You", text: chatMessage };
-        let userName = localStorage.getItem("username");
-        socket.emit("sending-message", { chatMessage, userName }, (response) => {
-            console.log(userName);
-            console.log("Message sent: " + chatMessage);
-            console.log("Server response: " + response);
-        });
+        if (socket) {
+            const newMessage = { userName: "You", chatMessage: chatMessage };
+            let userName = localStorage.getItem("username");
+            socket.emit("sending-message", { chatMessage, userName }, (response) => {
+                console.log(userName);
+                console.log("Message sent: " + chatMessage);
+                console.log("Server response: " + response);
+            });
 
-        setMessages((prevMessages) => [...prevMessages, newMessage]);
-        setChatMessage("");
+            setMessages((prevMessages) => [...prevMessages, newMessage]);
+            setChatMessage("");
+        }
     };
+
+    useEffect(() => {
+        const socketIoServer = io(`${import.meta.env.VITE_REACT_BACKEND_URL}`);
+        setsocket(socketIoServer)
+    }, [])
+
+    useEffect(() => {
+        if (socket) {
+            socket.on("new-message-to-all", (newMessage) => {
+                setMessages((prevMessages) => [...prevMessages, newMessage]);
+                console.log(newMessage);
+            });
+            return () => {
+                socket.off("new-message-to-all");
+                socket.disconnect();
+            };
+        }
+    }, [socket])
+
+
 
 
     return (
@@ -52,10 +73,10 @@ const Livechat = () => {
                                     className="chat-message"
                                     style={{
                                         backgroundColor:
-                                            msg.user == "You" ? "#DCF8C6" : "#EDEDED",
+                                            msg.userName == "You" ? "#DCF8C6" : "#EDEDED",
                                     }}
                                 >
-                                    <strong>{msg.user}:</strong> {msg.text}
+                                    <strong>{msg.userName}:</strong> {msg.chatMessage}
                                 </div>
                             ))}
                         </div>

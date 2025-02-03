@@ -9,8 +9,8 @@ const AiSupport = (props) => {
 
     const sidebarRef = useRef(null);
     const [sidebarWidth, setSidebarWidth] = useState(300);
-    const [prompt, setprompt] = useState(null)
-    const [output, setoutput] = useState(null)
+    const [prompt, setprompt] = useState("")
+    const [output, setoutput] = useState("")
     const [IsDragging, setIsDragging] = useState(false)
     const [isLoading, setisLoading] = useState(false)
 
