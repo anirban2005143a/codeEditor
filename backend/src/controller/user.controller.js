@@ -14,9 +14,7 @@ const RegisterUser = async (req, res) => {
     const { username, email, password } = req.body;
     // console.log(username, email, password);
 
-    const user = await UserModel.findOne({
-      $or: [{ email }, { username }],
-    });
+    const user = await UserModel.findOne({ email ,  username });
     // console.log("user");
 
     if (user) {
@@ -320,60 +318,64 @@ const fetchUserData = async (req, res) => {
   }
 }
 
-const savecode = async (req , res)=>{
-  const email = req.body.email
-  console.log(req.body)
-
-  console.log("dfbvdhb jnuuidfhur urhgurhg")
-  // Check if email is provided
-  if (!email) {
-    return res.status(400).json({ message: 'Email is required.' });
-  }
-
-  // Verify that the token belongs to the requested email
-  if (req.user.email !== email) {
-    return res.status(403).json({ message: 'Unauthorized access.' });
-  }
-
+const savecode = async (req, res) => {
   try {
-    // Fetch user details from the database
-    const newCode = new CodeModel({
-      code : req.body.code,
-      name : req.body.name,
-      email : uuidv4().toString(),
-    })
-    console.log(newCode)
-    newCode.save()
-    res.status(200).json({ message : "code save successfully"});
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server error.' });
-  }
-}
+    const { id, code, title } = req.body;
 
-const fetchCode = async (req , res) => {
-  const { email } = req.body;
-  console.log(email)
-  // Check if email is provided
-  if (!email) {
-    return res.status(400).json({ message: 'Email is required.' });
-  }
+    if (!id || !code) {
+      return res.status(400).json({ message: "User ID and code are required" });
+    }
 
-  // Verify that the token belongs to the requested email
-  if (req.user.email !== email) {
-    return res.status(403).json({ message: 'Unauthorized access.' });
-  }
+    const newcode = await CodeModel.create({
+      code: code,
+      user: id,
+      title
+    });
 
+    return res.status(200).json({
+      message: "Data saved successfully",
+      data: newcode,
+    });
+  } catch (error) {
+    console.error("Error saving code:", error);
+    return res.status(500).json({
+      message: error.message || "Internal Server Error",
+    });
+  }
+};
+
+
+const fetchmyCode = async (req, res) => {
   try {
-    // Fetch user details from the database
-    const codes = await CodeModel.find({email : req.user.email });
+    const { user_id } = req.body;
 
-    res.status(200).json({ message: "successfully fetched", codes });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server error.' });
+    if (!user_id) {
+      return res.status(400).json({ message: "User ID is required" });
+    }
+
+    const docs = await CodeModel.find({ user: user_id });
+
+    if (docs.length === 0) {
+      return res.status(200).json({
+        message: "You have no saved code.",
+        data: []
+      });
+    }
+
+    return res.status(200).json({
+      message: "Your saved codes:",
+      data: docs
+    });
+
+  } catch (error) {
+    console.error("Error fetching code:", error);
+    return res.status(500).json({
+      message: "Error accessing saved codes",
+      error: error.message
+    });
   }
-}
+};
+
 
 export {
   RegisterUser,
@@ -385,5 +387,5 @@ export {
   generatingtoken,
   fetchUserData,
   savecode,
-  fetchCode
+  fetchmyCode
 };

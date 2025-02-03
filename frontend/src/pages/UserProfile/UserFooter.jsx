@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { gsap } from 'gsap';
 
-const UserFooter = () => {
+const UserFooter = (props) => {
   const footerRef = useRef(null);
 
   useEffect(() => {
@@ -16,7 +16,7 @@ const UserFooter = () => {
 
   return (
     <div ref={footerRef} className="text-center text-gray-600 dark:text-gray-400">
-      <p>© 2023 John Doe. All rights reserved.</p>
+      <p>© 2023 {props.userDetails.name}. All rights reserved.</p>
     </div>
   );
 };

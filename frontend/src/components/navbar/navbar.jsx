@@ -115,7 +115,7 @@ const Navbar = (props) => {
             {isOpen && (
               <div
                 ref={UserdropdownRef}
-                className="absolute mt-2 px-2 w-[150px] bg-slate-800 border border-slate-700 rounded-lg shadow-lg"
+                className="absolute -translate-x-8 mt-2 px-2 w-[120px] bg-slate-800 border border-slate-700 rounded-lg shadow-lg"
               >
                 <ul className="py-2">
                   {(localStorage.getItem("islogin") === "false" || !localStorage.getItem("islogin") ) && <li>

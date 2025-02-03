@@ -1,7 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { gsap } from 'gsap';
 import UserHeader from './UserHeader';
-import UserStats from './UserStats';
 import UserGallery from './UserGallery';
 import UserFooter from './UserFooter';
 import Navbar from '../../components/navbar/navbar';
@@ -22,17 +21,6 @@ function UserProfile() {
           Authorization: localStorage.getItem("token")
         }
       );
-
-      toast(res.data.message, {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        closeOnClick: false,
-        pauseOnHover: true,
-        draggable: true,
-        progress: undefined,
-        theme: "dark",
-      });
       setuserDetails(res.data.userDetails)
       console.log(res)
     } catch (error) {
@@ -67,14 +55,13 @@ function UserProfile() {
   
 
   return (
-    <div ref={appRef} className="min-h-screen bg-gray-900 text-gray-900 dark:text-white">
+    <div ref={appRef} className="min-h-screen bg-gray-900 text-gray-900 dark:text-white overflow-x-hidden">
       <Navbar />
       <ToastContainer/>
       <div className="container mx-auto px-4 py-8 ">
         <UserHeader userDetails={userDetails}/>
-        <UserStats />
         <UserGallery />
-        <UserFooter />
+        <UserFooter userDetails={userDetails} />
       </div>
     </div>
   );

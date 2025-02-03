@@ -58,7 +58,7 @@ const AiSupport = (props) => {
                 },
                 body: JSON.stringify({ code_prompt: `${prompt} and the language is ${props.language}` }), // JSON payload
             });
-
+            console.log(response)
             setisLoading(false)
             if (!response.ok) {
                 console.log("error")

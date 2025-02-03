@@ -5,15 +5,19 @@ const CodeSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    name: {
-      type: String,
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
       required: true,
     },
-    id:{
-      type: String,
-      require :false
+    title:{
+      type:String,
+      required:true
     }
   },
+  {
+    timestamps: true
+  }
 );
 
-export const CodeModel = mongoose.model("Code", CodeSchema);
+export const CodeModel = mongoose.model("userCode", CodeSchema);

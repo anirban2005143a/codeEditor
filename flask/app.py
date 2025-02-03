@@ -30,37 +30,7 @@ def generate_code():
     if not data or 'code_prompt' not in data:
         return jsonify({"error": "Invalid JSON data. 'code_prompt' is required."}), 400
 
-    code_prompt = "you are excelent in coding . Your task is to send code based on given code and prompt and send the code making important portion bold or highlighted . Don't send any other any comments except the correct code ." + data['code_prompt']
-
-    # Start the timer to measure response time
-    st = time.time()
-
-    # Define retry policy (You can adjust this part as needed)
-    retry_policy = {
-        "retry": retry.Retry(predicate=retry.if_transient_error, initial=10, multiplier=1.5, timeout=300)
-    }
-
-    try:
-        # Generate code from AI model
-        response = model.generate_content(code_prompt, request_options=retry_policy)
-        code_output = response.text
-        response_time = time.time() - st
-        
-        # print(code_output)
-        # Return the generated code and response time
-        return jsonify({"generated_code": code_output, "response_time": response_time})
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-    
-    
-@app.route('/error_detect', methods=['POST'])
-def error_detect():
-    # Parse JSON data from the request body
-    data = request.get_json()
-    if not data or 'code_prompt' not in data:
-        return jsonify({"error": "Invalid JSON data. 'code_prompt' is required."}), 400
-
-    code_prompt = "you are excelent in coding . Your task is to Find the error in the provided code respective and send the correct code making edited portion bold or highlighted based on the given language . the language will be provided . Don't send any other any comments except the correct code ." + data['code_prompt']
+    code_prompt = "you are excelent in coding . Your task is to send response based on given code and prompt and send the code making important portion bold or highlighted . Don't send any other any comments except the correct code ." + data['code_prompt']
 
     # Start the timer to measure response time
     st = time.time()
@@ -82,7 +52,6 @@ def error_detect():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
     
-
 
 if __name__ == '__main__':
     app.run(debug=True)

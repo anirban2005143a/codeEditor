@@ -384,29 +384,6 @@ const CodeEditor = () => {
     }
   }
 
-  // function to save code 
-  const saveCode = async () => {
-    try {
-      setloading(true)
-      const res = await axios.post(`${import.meta.env.VITE_REACT_BACKEND_URL}/api/haxplore/user/saveCode`,
-        {
-          name: codeName,
-          code: code,
-          email: localStorage.getItem("email"),
-          Authorization: localStorage.getItem("token")
-        }
-      )
-      setloading(false)
-      console.log(res)
-      toast(`${res.data.message}`);
-    } catch (error) {
-      setloading(false)
-      console.log(error.message)
-      toast(`${error.message}`);
-      console.log(error)
-    }
-
-  }
 
   // useEffect 
   useEffect(() => {
@@ -664,7 +641,7 @@ const CodeEditor = () => {
       <Navbar />
 
       {/* modal  */}
-      <AutoSaveModal />
+      <AutoSaveModal code={code} />
 
       <h2 className=" font-semibold p-4 mt-[80px] text-white text-2xl">AI-Assisted Code Editor</h2>
 
@@ -749,9 +726,9 @@ const CodeEditor = () => {
           <button
             disabled={loading}
             onClick={() => {
-              // console.log(document.querySelector("#saveCodeModal"))
-              // document.querySelector("#saveCodeModal").click()
-              saveCode()
+              console.log(document.querySelector("#saveCodeModal"))
+              const elem = document.querySelector("#saveCodeModal")
+              elem && elem.click()
             }} type="button" className="text-white cursor-pointer bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700">
             {loading ? "Saving" : "Save Code"}
           </button>
