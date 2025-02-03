@@ -115,17 +115,17 @@ const Navbar = (props) => {
             {isOpen && (
               <div
                 ref={UserdropdownRef}
-                className="absolute mt-2 px-4 bg-slate-800 border border-slate-700 rounded-lg shadow-lg"
+                className="absolute mt-2 px-2 w-[150px] bg-slate-800 border border-slate-700 rounded-lg shadow-lg"
               >
                 <ul className="py-2">
-                  {localStorage.getItem("islogin") === "false" && <li>
+                  {(localStorage.getItem("islogin") === "false" || !localStorage.getItem("islogin") ) && <li>
                     <Link to="/signin"
                       className="block rounded-sm px-4 py-2 text-slate-200 hover:bg-slate-700 transition-colors"
                     >
                       Sign In
                     </Link>
                   </li>}
-                  {localStorage.getItem("islogin") === "false" && <li>
+                  {(localStorage.getItem("islogin") === "false" || !localStorage.getItem("islogin") ) && <li>
                     <Link to="/Signup"
                       className="block rounded-sm px-4 py-2 text-slate-200 hover:bg-slate-700 transition-colors"
                     >

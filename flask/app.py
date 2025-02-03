@@ -46,7 +46,7 @@ def generate_code():
         code_output = response.text
         response_time = time.time() - st
         
-        print(code_output)
+        # print(code_output)
         # Return the generated code and response time
         return jsonify({"generated_code": code_output, "response_time": response_time})
     except Exception as e:

@@ -13,7 +13,7 @@ function SignInPage() {
 
   const handleLoginGoogle = async () => {
     try {
-        const response = await axios.get('http://localhost:4000/api/haxplore/user/tokengeneration');
+        const response = await axios.get(`${import.meta.env.VITE_REACT_BACKEND_URL}/api/haxplore/user/tokengeneration`);
   
       localStorage.setItem("token", response.data.jwttoken);
   
@@ -23,8 +23,8 @@ function SignInPage() {
   
       await account.createOAuth2Session(
         "google",
-        "http://localhost:5173",
-        "http://localhost:5173/fail"
+        `${import.meta.env.VITE_REACT_CLIENT_URL}`,
+        `${import.meta.env.VITE_REACT_CLIENT_URL}/fail`
       );
       localStorage.setItem("islogin" , "true")
     } catch (error) {
@@ -40,7 +40,7 @@ function SignInPage() {
       // toast.success("login into the system");
       console.log("handling login");
       const response = await axios.post(
-        `${import.meta.env.VITE_REACT_BACKEND_URL}/ap/haxplore/user/Login`,
+        `${import.meta.env.VITE_REACT_BACKEND_URL}/api/haxplore/user/Login`,
         {
           email,
           password,
