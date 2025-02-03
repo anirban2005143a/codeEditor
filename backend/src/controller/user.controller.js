@@ -6,6 +6,8 @@ import bcrypt from "bcrypt";
 import twilio from "twilio";
 import otpgenerator from "otp-generator";
 import axios from "axios"
+import { v4 as uuidv4 } from 'uuid';
+
 
 const RegisterUser = async (req, res) => {
   try {
@@ -321,6 +323,8 @@ const fetchUserData = async (req, res) => {
 const savecode = async (req , res)=>{
   const email = req.body.email
   console.log(req.body)
+
+  console.log("dfbvdhb jnuuidfhur urhgurhg")
   // Check if email is provided
   if (!email) {
     return res.status(400).json({ message: 'Email is required.' });
@@ -334,12 +338,12 @@ const savecode = async (req , res)=>{
   try {
     // Fetch user details from the database
     const newCode = new CodeModel({
-      email : req.user.email,
       code : req.body.code,
-      name : req.body.name
+      name : req.body.name,
+      email : uuidv4().toString(),
     })
-    newCode.save()
     console.log(newCode)
+    newCode.save()
     res.status(200).json({ message : "code save successfully"});
   } catch (err) {
     console.error(err);

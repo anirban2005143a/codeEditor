@@ -9,7 +9,7 @@ const CodeSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    email:{
+    id:{
       type: String,
       require :false
     }
