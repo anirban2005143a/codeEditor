@@ -1,7 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import {
-  FaJs, FaPython, FaJava, FaCss3, FaHtml5, FaFile, FaReact, FaNodeJs, FaDatabase,
-  FaRProject, FaSwift, FaPhp, FaRust, FaDocker, FaGitAlt, FaTerminal
+  FaJs, FaPython, FaJava,  FaHtml5, FaFile, FaRProject, FaSwift, FaPhp, FaRust, FaTerminal
 } from 'react-icons/fa';
 import { SiTypescript, SiCplusplus, SiRuby, SiGo, SiKotlin, SiPerl, SiDart, SiHaskell, SiYaml, SiXml } from 'react-icons/si';
 
@@ -216,7 +215,7 @@ const NavigationPanel = (props) => {
     <div
       ref={navRef}
       className="h-full bg-slate-600 transition-all duration-150 md:my-0 my-4"
-      style={{ width: window.innerWidth >= 768 ?  props.isNavOpen ? "20%" : "0%" : "100%"}}
+      style={{ width: window.innerWidth >= 768 ? props.isNavOpen ? "20%" : "0%" : "100%" }}
     >
       <div className="p-4 transition-all duration-50 overflow-y-auto h-full " style={{ opacity: props.isNavOpen ? "1" : "0" }}>
         <div className="flex justify-between items-center">

@@ -26,7 +26,9 @@ function SignInPage() {
         "http://localhost:5173",
         "http://localhost:5173/fail"
       );
+      localStorage.setItem("islogin" , "true")
     } catch (error) {
+      localStorage.setItem("islogin" , "false")
       console.error("Error during the login process:", error);
     }
   };
@@ -38,7 +40,7 @@ function SignInPage() {
       // toast.success("login into the system");
       console.log("handling login");
       const response = await axios.post(
-        `${import.meta.env.VITE_REACT_BACKEND_URL}/api/haxplore/user/Login`,
+        `${import.meta.env.VITE_REACT_BACKEND_URL}/ap/haxplore/user/Login`,
         {
           email,
           password,
@@ -50,11 +52,14 @@ function SignInPage() {
       localStorage.setItem("token", response.data.jwttoken);
       localStorage.setItem("username", response.data.user.username);
       localStorage.setItem("email", response.data.user.email);
+      localStorage.setItem("islogin" , "true")
       toast.success(response.data.message);
       console.log(response.data.user.isverified);
       if (response.data.user.isverified) {
         navigate("/editor");
+        localStorage.setItem("islogin" , "true")
       } else {
+        localStorage.setItem("islogin" , "false")
         navigate("/mobilenumberverication");
       }
     } catch (error) {

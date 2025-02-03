@@ -21,14 +21,17 @@ const Privateroutes = ({ children }) => {
       // console.log(response);
       if (response.data.success) {
         setIsverified(true);
+        localStorage.setItem("islogin" , "true")
         toast.success("Token verified! Welcome to your private area.");
       } else {
         setIsverified(false);
+        localStorage.setItem("islogin" , "false")
         toast.error("Unauthorized access. Please log in.");
       }
     } catch (error) {
       // console.error("Token verification failed:", error);
       setIsverified(false);
+      localStorage.setItem("islogin" , "false")
       toast.error("Session timeout , Token has been expired,Login again");
     } finally {
       setIsLoading(false);
@@ -47,7 +50,7 @@ const Privateroutes = ({ children }) => {
 
   if (isLoading) {
     return (
-      <div className=" w-[100vh] h-[100vh] "
+      <div className=" w-[100vw] h-[100vh] "
         style={{
           display: "flex",
           justifyContent: "center",

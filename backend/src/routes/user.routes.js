@@ -6,6 +6,8 @@ import {
   checkingotp,
   generateandsetOTP,
   generatingtoken,
+  fetchUserData,
+  savecode,
 } from "../controller/user.controller.js";
 
 import {
@@ -26,4 +28,6 @@ userrouter.route("/sendingOTP").post(generateandsetOTP);
 userrouter.route("/checkingOTP").post(checkingotp);
 userrouter.route("/Executingcode").post(executeCode);
 userrouter.route("/tokengeneration").get(generatingtoken);
+userrouter.route("/fetchUserData").post(authtoken ,fetchUserData);
+userrouter.route("/saveCode").post(authtoken ,savecode);
 export default userrouter;

@@ -4,6 +4,7 @@ import { ToastContainer, toast } from 'react-toastify';
 import * as monaco from "monaco-editor";
 import axios from "axios"
 import aiimg from "../../assets/aiIMg.png"
+import crossImg from "../../assets/cross.png"
 import gsap from "gsap";
 
 // Auto complete for languages
@@ -33,6 +34,7 @@ import Navbar from "../../components/navbar/navbar";
 import Livechat from "../../components/live chat/livechat";
 import ErrorSuggestion from "../../components/errorSuggetion/ErrorSuggetion";
 import AiSupport from "../../components/aiSupport/AiSupport";
+import AutoSaveModal from "./AutoSaveModal";
 
 
 const CodeEditor = () => {
@@ -52,6 +54,8 @@ const CodeEditor = () => {
   const [userCursorsHoverEffect, setUserCursorsHoverEffect] = useState({}); // { userId: { decorationId, position } }
   const [isCollaboration, setisCollaboration] = useState(false)
   const [currentRemoteStatus, setcurrentRemoteStatus] = useState("")
+  const [codeName, setcodeName] = useState("default")
+  const [loading, setloading] = useState(false)
 
   const mainRef = useRef(null);
   const editorRef = useRef(null);
@@ -64,6 +68,17 @@ const CodeEditor = () => {
   document.body.style.overflowY = "auto";
 
   const handleCodeChange = (value) => {
+    const newcode = addedLinks
+    newcode[selectedLink.name].code = value.toString()
+    // console.log(newcode)
+    setAddedLinks(newcode)
+
+    // if (autoSave) {
+    //   localStorage.setItem("autoSavedCode", JSON.stringify(addedLinks))
+    // } else {
+    //   localStorage.removeItem("autoSavedCode")
+    // }
+
     setCode(value); // Update the local code state
     socket.emit("codeChange", { roomID, code: value, name: localStorage.getItem("username") || "unknown" }); // Emit updated code to other users
   };
@@ -369,13 +384,35 @@ const CodeEditor = () => {
     }
   }
 
-  // console.log(output)
+  // function to save code 
+  const saveCode = async () => {
+    try {
+      setloading(true)
+      const res = await axios.post(`${import.meta.env.VITE_REACT_BACKEND_URL}/api/haxplore/user/saveCode`,
+        {
+          name: codeName,
+          code: code,
+          email: localStorage.getItem("email"),
+          Authorization: localStorage.getItem("token")
+        }
+      )
+      setloading(false)
+      console.log(res)
+      toast(`${res.data.message}`);
+    } catch (error) {
+      setloading(false)
+      console.log(error.message)
+      toast(`${error.message}`);
+      console.log(error)
+    }
+
+  }
+
   // useEffect 
   useEffect(() => {
     const socketIoServer = io(`${import.meta.env.VITE_REACT_BACKEND_URL}`);
     setSocket(socketIoServer)
   }, [])
-  
 
   useEffect(() => {
     if (roomID && socket && roomID.length === 11) {
@@ -391,7 +428,7 @@ const CodeEditor = () => {
 
       socket.on("userJoined", ({ id, name }) => {
         setisCollaboration(true)
-        setcurrentRemoteStatus( name + " join ")
+        setcurrentRemoteStatus(name + " join ")
         console.log("user join " + id);
       });
 
@@ -591,12 +628,29 @@ const CodeEditor = () => {
         setcurrentRemoteStatus("")
       }, 5000);
     } else {
-      if(interval) clearInterval(interval)
+      if (interval) clearInterval(interval)
     }
   }, [currentRemoteStatus])
 
+  // useEffect(() => {
+  //   if (autoSave) {
+  //     localStorage.setItem("autoSavedCode", JSON.stringify(addedLinks))
+  //   } else {
+  //     localStorage.removeItem("autoSavedCode")
+  //   }
+  // }, [autoSave])
 
-  console.log(currentRemoteStatus)
+  useEffect(() => {
+    if (selectedLink && addedLinks[selectedLink.name]) {
+      // console.log(addedLinks[selectedLink.name].code)
+      const newcode = addedLinks[selectedLink.name].code
+      setCode(newcode)
+    }
+  }, [selectedLink])
+
+
+  // console.log(addedLinks)
+  // console.log(selectedLink)
 
   return (
     <div
@@ -609,6 +663,9 @@ const CodeEditor = () => {
       {/* navbar  */}
       <Navbar />
 
+      {/* modal  */}
+      <AutoSaveModal />
+
       <h2 className=" font-semibold p-4 mt-[80px] text-white text-2xl">AI-Assisted Code Editor</h2>
 
       {/* all buttons  */}
@@ -616,7 +673,7 @@ const CodeEditor = () => {
         <div className="controlBtns flex flex-wrap items-center justify-start gap-2">
 
           {/* open or close navigation panel  */}
-          {!isCollaboration && window.innerWidth>=768 && <button
+          {!isCollaboration && window.innerWidth >= 768 && <button
             onClick={toggleNav}
             className=" cursor-pointer bg-purple-500 text-white px-4 py-2 rounded-lg shadow-lg"
           >
@@ -687,6 +744,17 @@ const CodeEditor = () => {
               <option value="sunset-glow">Sunset Glow</option>
             </select>
           </div>
+
+          {/* save code  */}
+          <button
+            disabled={loading}
+            onClick={() => {
+              // console.log(document.querySelector("#saveCodeModal"))
+              // document.querySelector("#saveCodeModal").click()
+              saveCode()
+            }} type="button" className="text-white cursor-pointer bg-gray-800 hover:bg-gray-900 focus:outline-none focus:ring-4 focus:ring-gray-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-gray-800 dark:hover:bg-gray-700 dark:focus:ring-gray-700 dark:border-gray-700">
+            {loading ? "Saving" : "Save Code"}
+          </button>
 
           {/* undo btn  */}
           <button id="undoBtn" className="w-10 h-8 bg-slate-700 rounded-xl px-2 cursor-pointer hover:bg-slate-800">
@@ -765,11 +833,11 @@ const CodeEditor = () => {
           <div
             ref={mainRef}
             className="h-full transition-all duration-150"
-            style={{ width: window.innerWidth >= 768 ? isNavOpen ? "80%" : "100%" : "100%"}}
+            style={{ width: window.innerWidth >= 768 ? isNavOpen ? "80%" : "100%" : "100%" }}
           >
             <div className="h-full">
               <div ref={containerRef} id="monacoEditor" className="h-full relative">
-                <MonacoEditor
+                {socket && <MonacoEditor
                   height="100%"
                   language={language}
                   theme={theme}
@@ -794,7 +862,7 @@ const CodeEditor = () => {
                     foldingStrategy: "auto",
                     showFoldingControls: "always",
                   }}
-                />
+                />}
               </div>
             </div>
           </div>

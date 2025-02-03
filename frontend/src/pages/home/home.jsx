@@ -10,11 +10,6 @@ import MousePointer from '../../components/mousePointer/mousePointer'
 import RoomNoModal from '../../components/roomNoModal/roomNoModal';
 
 const Home = () => {
-
-    window.addEventListener("mouseup" , ()=>{
-        const a = window.getSelection().toString();
-        console.log(a)
-    })
     
     return (
         <div id='home' className=' bg-black relative overflow-x-hidden'>

@@ -1,5 +1,6 @@
 import { UserModel } from "../Models/User.model.js";
-import { OTPmodel  } from "../Models/OTP.model.js";
+import { CodeModel } from "../Models/codeSave.js";
+import { OTPmodel } from "../Models/OTP.model.js";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import twilio from "twilio";
@@ -55,7 +56,7 @@ const RegisterUser = async (req, res) => {
 
 const LoginUser = async (req, res) => {
   try {
-    const { email, password  } = req.body;
+    const { email, password } = req.body;
 
     const user = await UserModel.findOne({ email });
 
@@ -75,7 +76,7 @@ const LoginUser = async (req, res) => {
     // console.log(process.env.Authentication_for_jsonwebtoken);
 
     const jsonewbestoken = jwt.sign(
-      { email: user.email, _id: user.id },
+      { email: user.email },
       process.env.Authentication_for_jsonwebtoken,
       { expiresIn: "24h" }
     );
@@ -143,9 +144,9 @@ const generateandsetOTP = async (req, res) => {
   }
 };
 
-const checkingotp =async (req, res) => {
+const checkingotp = async (req, res) => {
   try {
-    const { phonenumber, otp ,id} = req.body;
+    const { phonenumber, otp, id } = req.body;
 
     if (!otp) {
       return res.status(400).json({
@@ -277,6 +278,99 @@ const generatingtoken = async (req, res) => {
   }
 };
 
+const fetchUserData = async (req, res) => {
+  const { email } = req.body;
+  console.log(email)
+  // Check if email is provided
+  if (!email) {
+    return res.status(400).json({ message: 'Email is required.' });
+  }
+
+  // Verify that the token belongs to the requested email
+  if (req.user.email !== email) {
+    return res.status(403).json({ message: 'Unauthorized access.' });
+  }
+
+  try {
+    // Fetch user details from the database
+    const user = await UserModel.findOne({ email });
+
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    // Check if the user is verified
+    if (!user.isverified) {
+      return res.status(403).json({ message: 'User is not verified.' });
+    }
+
+    // Return user details (excluding sensitive data like password)
+    const userDetails = {
+      email: user.email,
+      name: user.username,
+      isverified: user.isverified,
+    };
+
+    res.status(200).json({ message: "details fetched successfully", userDetails });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error.' });
+  }
+}
+
+const savecode = async (req , res)=>{
+  const email = req.body.email
+  console.log(req.body)
+  // Check if email is provided
+  if (!email) {
+    return res.status(400).json({ message: 'Email is required.' });
+  }
+
+  // Verify that the token belongs to the requested email
+  if (req.user.email !== email) {
+    return res.status(403).json({ message: 'Unauthorized access.' });
+  }
+
+  try {
+    // Fetch user details from the database
+    const newCode = new CodeModel({
+      email : req.user.email,
+      code : req.body.code,
+      name : req.body.name
+    })
+    newCode.save()
+    console.log(newCode)
+    res.status(200).json({ message : "code save successfully"});
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error.' });
+  }
+}
+
+const fetchCode = async (req , res) => {
+  const { email } = req.body;
+  console.log(email)
+  // Check if email is provided
+  if (!email) {
+    return res.status(400).json({ message: 'Email is required.' });
+  }
+
+  // Verify that the token belongs to the requested email
+  if (req.user.email !== email) {
+    return res.status(403).json({ message: 'Unauthorized access.' });
+  }
+
+  try {
+    // Fetch user details from the database
+    const codes = await CodeModel.find({email : req.user.email });
+
+    res.status(200).json({ message: "successfully fetched", codes });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: 'Server error.' });
+  }
+}
+
 export {
   RegisterUser,
   LoginUser,
@@ -284,5 +378,8 @@ export {
   generateandsetOTP,
   checkingotp,
   executeCode,
-  generatingtoken
+  generatingtoken,
+  fetchUserData,
+  savecode,
+  fetchCode
 };

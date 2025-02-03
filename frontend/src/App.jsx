@@ -9,8 +9,12 @@ import SignInPage from "./components/auth/signin";
 import Privateroutes from "./components/auth/Privateroute.jsx";
 import CreateRoom from "./components/auth/socket.jsx";
 import AboutPage from "./pages/about/about.jsx";
+import UserProfile from "./pages/UserProfile/UserProfile.jsx";
 
 function App() {
+
+  const [isLogin, setisLogin] = useState(localStorage.getItem("islogin"))
+
   const router = createBrowserRouter([
     {
       path: "/",
@@ -23,14 +27,14 @@ function App() {
     {
       path: "/editor",
       element: (
-        <Privateroutes>
+        <Privateroutes setisLogin={setisLogin}>
           <CodeEditor />
         </Privateroutes>
       ),
     },
     {
       path: "/Signin",
-      element: <SignInPage />,
+      element: <SignInPage setisLogin={setisLogin} />,
     },
     {
       path: "/Signup",
@@ -47,7 +51,10 @@ function App() {
     {
       path: "/ll",
       element: <CreateRoom />,
-    }
+    },{
+      path: "/user/profile",
+      element: <UserProfile />,
+    },
   ]);
 
   return (

@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 
 const authtoken = async (req, res, next) => {
-  // console.log("Middleware Triggered: Checking Authorization...");
+  console.log("Middleware Triggered: Checking Authorization...");
   const { Authorization } = req.body;
 
   if (!Authorization) {
