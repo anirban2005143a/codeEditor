@@ -57,7 +57,7 @@ video demo - https://drive.google.com/file/d/1jxgk5UJYMwtnjDUV8IOSYDSnFgNThWHl/v
 
 You can view a live demo of the editor - https://code-fusion-pied.vercel.app/
 
-You can view a submitted ppt demo of this editor [here](https://drive.google.com/file/d/1OVoISA3KfN6zXuWlEPTC9jhLzzJ79dnu/view?usp=drive_link).
+You can view a submitted ppt demo of this editor [here](https://drive.google.com/file/d/19fTx7NWl0e-9jC_jsCogTKBK_nrAxrd5/view?usp=sharing).
 
 ## Future Updates
 
